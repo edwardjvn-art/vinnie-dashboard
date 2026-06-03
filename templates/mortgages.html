@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Mortgages — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header"><div class="page-title">Mortgages</div></div>
+
+  <div class="metrics metrics-4">
+    <div class="metric accent">
+      <div class="metric-label">Total Outstanding</div>
+      <div class="metric-value">£{{ "{:.2f}M".format(total_bal/1000000) }}</div>
+      <div class="metric-sub">Across all properties</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Monthly Payments</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_mtg) }}</div>
+      <div class="metric-sub">Combined</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Fixed Rate</div>
+      <div class="metric-value">{{ n_fixed }}</div>
+      <div class="metric-sub">Mortgages</div>
+    </div>
+    <div class="metric {% if n_tracker > 0 %}orange{% endif %}">
+      <div class="metric-label">Tracker Rate</div>
+      <div class="metric-value">{{ n_tracker }}</div>
+      <div class="metric-sub">Rate may change</div>
+    </div>
+  </div>
+
+  {% if n_tracker > 0 %}
+  <div class="notice" style="margin-bottom:1.25rem;">
+    ⚠️ {{ n_tracker }} tracker mortgage(s) — BoE base rate 5.25%, next decision 20 Jun 2025
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Property</th><th>Lender</th><th>Type</th><th>Rate</th><th>Outstanding</th><th>Monthly</th><th>Ends</th><th>Docs</th></tr></thead>
+        <tbody>
+          {% for p in props %}
+          <tr>
+            <td><strong>{{ p.address.split(',')[0] }}</strong></td>
+            <td class="td-muted">{{ p.mortgage_lender }}</td>
+            <td>
+              {% if p.mortgage_type == 'Fixed' %}<span class="pill pill-blue">Fixed</span>
+              {% else %}<span class="pill pill-orange">Tracker</span>{% endif %}
+            </td>
+            <td>{{ p.mortgage_rate }}%</td>
+            <td class="td-bold">£{{ "{:,.0f}".format(p.mortgage_balance|float) }}</td>
+            <td class="td-bold">£{{ "{:,.0f}".format(p.mortgage_monthly|float) }}</td>
+            <td class="td-muted">{{ p.mortgage_end[:7] if p.mortgage_end else '—' }}</td>
+            <td>
+              {% if p.mortgage_doc_link and p.mortgage_doc_link != 'nan' %}
+              <a href="{{ p.mortgage_doc_link }}" target="_blank" style="color:#1AB4D7;font-size:0.8rem;font-weight:500;">View →</a>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

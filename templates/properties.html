@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Properties — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Properties</div>
+    <div class="page-sub">Select a property to view details, documents and maintenance</div>
+  </div>
+
+  <div class="metrics metrics-3" style="margin-bottom:1.75rem;">
+    <div class="metric accent">
+      <div class="metric-label">Total Properties</div>
+      <div class="metric-value">{{ props|length }}</div>
+      <div class="metric-sub">In portfolio</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Occupied</div>
+      <div class="metric-value">{{ occupied|length }}/{{ props|length }}</div>
+      <div class="metric-sub">Currently tenanted</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Monthly Income</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_rent) }}</div>
+      <div class="metric-sub">From rent</div>
+    </div>
+  </div>
+
+  {% for p in props %}
+  {% set rent = p.monthly_rent if p.monthly_rent and p.monthly_rent == p.monthly_rent else 0 %}
+  {% set beds = (p.bedrooms|int|string + '-bed') if p.bedrooms and p.bedrooms == p.bedrooms and p.bedrooms|int > 0 else 'Studio' %}
+  <a href="{{ url_for('property_detail', address=p.address) }}" class="item-card">
+    <div>
+      <div class="item-card-title">{{ p.address }}</div>
+      <div class="item-card-sub">{{ beds }} · £{{ "{:,.0f}".format(rent|float) }}/mo · {{ p.mortgage_lender }}</div>
+    </div>
+    <div class="item-card-right">
+      {% if p.rent_status == 'Paid' %}<span class="pill pill-green">Paid</span>
+      {% elif p.rent_status == 'Due' %}<span class="pill pill-orange">Due</span>
+      {% elif p.rent_status == 'Overdue' %}<span class="pill pill-red">Overdue</span>
+      {% else %}<span class="pill pill-grey">Vacant</span>{% endif %}
+      <span class="open-arrow">Open →</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}{{ prop.address }} — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+
+  <a href="{{ url_for('properties') }}" class="back-link">← All properties</a>
+
+  <div class="page-header">
+    <div class="page-title">{{ prop.address }}</div>
+    <div class="page-sub">
+      {% if prop.bedrooms and prop.bedrooms == prop.bedrooms and prop.bedrooms|int > 0 %}{{ prop.bedrooms|int }}-bed{% else %}Studio{% endif %}
+      · {{ prop.mortgage_lender }} · {{ prop.mortgage_type }} rate
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-label">Status</div>
+      <div class="stat-value">
+        {% if prop.rent_status == 'Paid' %}<span class="pill pill-green">Paid</span>
+        {% elif prop.rent_status == 'Due' %}<span class="pill pill-orange">Due</span>
+        {% elif prop.rent_status == 'Overdue' %}<span class="pill pill-red">Overdue</span>
+        {% else %}<span class="pill pill-grey">Vacant</span>{% endif %}
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Monthly Rent</div>
+      <div class="stat-value">
+        {% if prop.monthly_rent and prop.monthly_rent == prop.monthly_rent %}£{{ "{:,.0f}".format(prop.monthly_rent|float) }}{% else %}—{% endif %}
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Mortgage / mo</div>
+      <div class="stat-value">£{{ "{:,.0f}".format(prop.mortgage_monthly|float) }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Outstanding</div>
+      <div class="stat-value">£{{ "{:,.0f}".format(prop.mortgage_balance|float) }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Rate</div>
+      <div class="stat-value">{{ prop.mortgage_rate }}%</div>
+    </div>
+  </div>
+
+  {% if tenant and tenant.tenant_name and tenant.tenant_name != 'Vacant' and tenant.tenant_name == tenant.tenant_name %}
+  <div class="grid-2" style="margin-bottom:1.25rem;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Tenant</span></div>
+      <div class="card-body">
+        <div style="font-size:1rem;font-weight:700;margin-bottom:10px;">{{ tenant.tenant_name }}</div>
+        <div style="font-size:0.84rem;color:#6B7280;line-height:2;">
+          {{ tenant.email }}<br>
+          {{ tenant.phone }}<br>
+          Emergency: {{ tenant.emergency_contact }}<br>
+          Deposit held: <strong style="color:#111827;">£{{ "{:,.2f}".format(tenant.deposit|float) }}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Tenancy</span></div>
+      <div class="card-body">
+        <div style="font-size:0.84rem;color:#6B7280;line-height:2.2;">
+          Move in: <strong style="color:#111827;">{{ tenant.move_in_date }}</strong><br>
+          Move out: <strong style="color:#111827;">{{ tenant.tenancy_end }}</strong>
+        </div>
+        {% if days_left is not none %}
+          {% if days_left <= 60 %}
+          <div class="notice" style="margin-top:10px;margin-bottom:0;">⚠️ Tenancy ending in {{ days_left }} days</div>
+          {% else %}
+          <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:8px 14px;font-size:0.82rem;color:#059669;margin-top:10px;">✓ {{ days_left }} days remaining</div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div style="background:#F9FAFB;border:1px solid #EAECF0;border-radius:10px;padding:14px 18px;color:#9CA3AF;font-size:0.85rem;margin-bottom:1.25rem;">
+    🏚️ This property is currently vacant
+  </div>
+  {% endif %}
+
+  <div class="grid-2" style="margin-bottom:1.25rem;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">📋 Mortgage Documents</span></div>
+      <div class="card-body">
+        <div class="doc-grid">
+          <a class="doc-btn" href="{{ prop.mortgage_doc_link or '#' }}" target="_blank">📄 Mortgage Agreement</a>
+          <a class="doc-btn" href="{{ prop.mortgage_doc_link or '#' }}" target="_blank">🏦 Lender Correspondence</a>
+          <a class="doc-btn" href="{{ prop.mortgage_doc_link or '#' }}" target="_blank">📊 Valuation Report</a>
+        </div>
+        {% if not prop.mortgage_doc_link or prop.mortgage_doc_link == 'nan' %}
+        <div style="font-size:0.75rem;color:#C4C8D0;margin-top:10px;">Paste Google Drive links into properties.csv to activate</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">🏠 Tenancy Documents</span></div>
+      <div class="card-body">
+        {% if prop.rent_status != 'Vacant' %}
+        <div class="doc-grid">
+          <a class="doc-btn" href="{{ prop.tenancy_doc_link or '#' }}" target="_blank">📝 Tenancy Agreement</a>
+          <a class="doc-btn" href="{{ prop.tenancy_doc_link or '#' }}" target="_blank">🔑 Inventory Check-in</a>
+          <a class="doc-btn" href="{{ prop.tenancy_doc_link or '#' }}" target="_blank">📋 Gas Safety Certificate</a>
+          <a class="doc-btn" href="{{ prop.insurance_doc_link or '#' }}" target="_blank">🛡️ Buildings Insurance</a>
+        </div>
+        {% else %}
+        <div style="font-size:0.84rem;color:#9CA3AF;">Vacant — no tenancy documents</div>
+        {% endif %}
+        {% if not prop.tenancy_doc_link or prop.tenancy_doc_link == 'nan' %}
+        <div style="font-size:0.75rem;color:#C4C8D0;margin-top:10px;">Paste Google Drive links into properties.csv to activate</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-header"><span class="card-title">Maintenance History</span></div>
+    <div class="table-wrap">
+      {% if maint %}
+      <table>
+        <thead><tr><th>Date</th><th>Issue</th><th>Status</th><th>Cost</th><th>Notes</th></tr></thead>
+        <tbody>
+          {% for m in maint %}
+          <tr>
+            <td class="td-muted">{{ m.date }}</td>
+            <td><strong>{{ m.issue }}</strong></td>
+            <td>
+              {% if m.status == 'Completed' %}<span class="pill pill-green">Completed</span>
+              {% else %}<span class="pill pill-orange">In Progress</span>{% endif %}
+            </td>
+            <td>{% if m.cost and m.cost|float > 0 %}£{{ "{:,.2f}".format(m.cost|float) }}{% else %}—{% endif %}</td>
+            <td class="td-muted">{{ m.notes }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No maintenance records yet</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Log Maintenance Issue</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('log_maint', address=address) }}">
+        <div class="form-row">
+          <div class="form-group" style="flex:3;">
+            <label>Issue description</label>
+            <input type="text" name="issue" required placeholder="e.g. Boiler not working">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option>In Progress</option>
+              <option>Completed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cost £</label>
+            <input type="number" name="cost" value="0" min="0" step="10">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:4;">
+            <label>Notes</label>
+            <input type="text" name="notes" placeholder="Any additional notes">
+          </div>
+          <div class="form-group" style="flex:1;justify-content:flex-end;">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn">Log issue</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

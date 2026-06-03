@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}{{ lorry.reg }} — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <a href="{{ url_for('lorries') }}" class="back-link">← All lorries</a>
+
+  <div class="page-header">
+    <div class="page-title">{{ lorry.reg }} — {{ lorry.make }} {{ lorry.model }}</div>
+    <div class="page-sub">{{ lorry.year }} · {{ lorry.driver }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-label">Status</div>
+      <div class="stat-value">
+        {% if lorry.status == 'Active' %}<span class="pill pill-green">Active</span>
+        {% else %}<span class="pill pill-orange">{{ lorry.status }}</span>{% endif %}
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">MOT Expiry</div>
+      <div class="stat-value" style="font-size:0.9rem;">{{ lorry.mot_expiry }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Fuel Cost</div>
+      <div class="stat-value">£{{ "{:,.0f}".format(fuel_total) }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">VAT</div>
+      <div class="stat-value">£{{ "{:,.0f}".format(vat_total) }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Outstanding</div>
+      <div class="stat-value">£{{ "{:,.0f}".format(out_total) }}</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <a href="#" class="tab-link active" onclick="showTab('fuel',this)">Fuel & VAT</a>
+    <a href="#" class="tab-link" onclick="showTab('invoices',this)">Invoices</a>
+    <a href="#" class="tab-link" onclick="showTab('docs',this)">Documents</a>
+  </div>
+
+  <div id="tab-fuel" class="tab-panel active">
+    <div class="grid-2" style="margin-bottom:1.25rem;">
+      <div class="metric green">
+        <div class="metric-label">Total Fuel Cost</div>
+        <div class="metric-value">£{{ "{:,.2f}".format(fuel_total) }}</div>
+        <div class="metric-sub">This month</div>
+      </div>
+      <div class="metric green">
+        <div class="metric-label">VAT Reclaimable</div>
+        <div class="metric-value">£{{ "{:,.2f}".format(vat_total) }}</div>
+        <div class="metric-sub">This month</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Litres</th><th>Cost</th><th>VAT</th><th>Location</th></tr></thead>
+          <tbody>
+            {% for f in fuel %}
+            <tr>
+              <td class="td-muted">{{ f.date }}</td>
+              <td>{{ f.litres }}L</td>
+              <td class="td-bold">£{{ f.cost_gbp }}</td>
+              <td style="color:#10B981;">£{{ f.vat_gbp }}</td>
+              <td class="td-muted">{{ f.location }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-invoices" class="tab-panel">
+    <div class="grid-2" style="margin-bottom:1.25rem;">
+      <div class="metric green">
+        <div class="metric-label">Paid</div>
+        <div class="metric-value">£{{ "{:,.0f}".format(paid_total) }}</div>
+      </div>
+      <div class="metric {% if out_total > 0 %}orange{% endif %}">
+        <div class="metric-label">Outstanding</div>
+        <div class="metric-value">£{{ "{:,.0f}".format(out_total) }}</div>
+        <div class="metric-sub">Awaiting payment</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Invoice</th><th>Date</th><th>Client</th><th>Destination</th><th>Amount</th><th>VAT</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for inv in invoices %}
+            <tr>
+              <td class="td-muted">{{ inv.invoice_id }}</td>
+              <td class="td-muted">{{ inv.date }}</td>
+              <td>{{ inv.client }}</td>
+              <td class="td-muted">{{ inv.destination }}</td>
+              <td class="td-bold">£{{ "{:,.0f}".format(inv.amount_gbp|float) }}</td>
+              <td>£{{ "{:,.0f}".format(inv.vat_gbp|float) }}</td>
+              <td>
+                {% if inv.status == 'Paid' %}<span class="pill pill-green">Paid</span>
+                {% else %}<span class="pill pill-orange">Outstanding</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-docs" class="tab-panel">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Vehicle Documents</span></div>
+      <div class="card-body">
+        <div class="doc-grid">
+          <a class="doc-btn" href="{{ lorry.doc_link or '#' }}" target="_blank">📄 Operator Licence</a>
+          <a class="doc-btn" href="{{ lorry.doc_link or '#' }}" target="_blank">🔧 MOT Certificate</a>
+          <a class="doc-btn" href="{{ lorry.doc_link or '#' }}" target="_blank">🛡️ Insurance Document</a>
+          <a class="doc-btn" href="{{ lorry.doc_link or '#' }}" target="_blank">📋 Service History</a>
+          <a class="doc-btn" href="{{ lorry.doc_link or '#' }}" target="_blank">🗺️ Route Documents</a>
+        </div>
+        {% if not lorry.doc_link or lorry.doc_link == 'nan' %}
+        <div style="font-size:0.75rem;color:#C4C8D0;margin-top:10px;">Paste Google Drive links into lorries.csv to activate</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function showTab(name, el) {
+  event.preventDefault();
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+{% endblock %}

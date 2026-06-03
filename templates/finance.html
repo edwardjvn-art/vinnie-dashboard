@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Finance — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header"><div class="page-title">Finance</div></div>
+
+  <div class="metrics metrics-4">
+    <div class="metric accent">
+      <div class="metric-label">Rent Income</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_rent) }}/mo</div>
+      <div class="metric-sub">Occupied properties</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Mortgage Out</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_mtg) }}/mo</div>
+      <div class="metric-sub">All payments</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Net Cash Flow</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(net_cf) }}/mo</div>
+      <div class="metric-up">↑ After mortgages</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Cash Holdings</div>
+      <div class="metric-value">£{{ "{:,.2f}".format(total_bal) }}</div>
+      <div class="metric-sub">All accounts</div>
+    </div>
+  </div>
+
+  <div class="grid-60-40">
+    <div class="stack">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Cash Flow — Last 6 Months</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="cfChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Rent by Property</span></div>
+        <div class="card-body"><div class="chart-wrap-sm"><canvas id="rentChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Bank Accounts</span></div>
+        <div class="card-body">
+          {% for a in accounts %}
+          <div class="list-row">
+            <div>
+              <div class="list-row-title">{{ a.account_name }}</div>
+              <div class="list-row-sub">{{ a.bank }} · {{ a.type }}</div>
+            </div>
+            <div class="list-row-amount">£{{ "{:,.2f}".format(a.balance|float) }}</div>
+          </div>
+          {% endfor %}
+          <div class="divider"></div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:0.9rem;">
+            <span>Total</span>
+            <span style="color:#1AB4D7;">£{{ "{:,.2f}".format(total_bal) }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">3-Month Forecast</span></div>
+        <div class="card-body">
+          {% for month in forecast %}
+          <div class="list-row">
+            <span style="color:#6B7280;font-size:0.85rem;">{{ month }}</span>
+            <span style="font-weight:600;color:#10B981;">~£{{ "{:,.0f}".format(avg_net) }}</span>
+          </div>
+          {% endfor %}
+          <div style="font-size:0.73rem;color:#C4C8D0;margin-top:8px;">Based on 6-month average</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const cf = {{ cashflow | tojson }};
+new Chart(document.getElementById('cfChart'), {
+  type: 'bar',
+  data: {
+    labels: cf.map(d => d.month),
+    datasets: [
+      { label: 'Income', data: cf.map(d => d.income), backgroundColor: 'rgba(26,180,215,0.8)', borderRadius: 4 },
+      { label: 'Expenses', data: cf.map(d => d.expenses), backgroundColor: 'rgba(229,231,235,0.9)', borderRadius: 4 },
+      { label: 'Net', data: cf.map(d => d.net), type: 'line', borderColor: '#10B981', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#10B981', tension: 0.3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: { grid: { color: '#F3F4F6' }, ticks: { callback: v => '£'+v.toLocaleString(), font: { size: 11 } } }
+    }
+  }
+});
+
+const occupied = {{ occupied | tojson }};
+const rentData = occupied.filter(p => p.monthly_rent && !isNaN(p.monthly_rent));
+new Chart(document.getElementById('rentChart'), {
+  type: 'bar',
+  data: {
+    labels: rentData.map(p => p.address.split(',')[0]),
+    datasets: [{ data: rentData.map(p => parseFloat(p.monthly_rent)), backgroundColor: 'rgba(26,180,215,0.75)', borderRadius: 4, label: 'Rent' }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+      y: { grid: { color: '#F3F4F6' }, ticks: { callback: v => '£'+v.toLocaleString(), font: { size: 11 } } }
+    }
+  }
+});
+</script>
+{% endblock %}

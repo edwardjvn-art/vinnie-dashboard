@@ -1,0 +1,6 @@
+lorry_id,reg,make,model,year,driver,status,mot_expiry,insurance_expiry,doc_link
+L001,AB21 XYZ,Volvo,FH16,2021,Dave Watkins,Active,2026-03-01,2026-01-01,https://drive.google.com/example
+L002,CD22 ABC,Mercedes,Actros,2022,Pete Nolan,Active,2026-05-01,2026-01-01,https://drive.google.com/example
+L003,EF19 DEF,DAF,XF,2019,Terry Banks,Active,2025-11-01,2026-01-01,https://drive.google.com/example
+L004,GH20 GHI,Volvo,FH,2020,Steve Marsh,In Repair,2026-02-01,2026-01-01,https://drive.google.com/example
+L005,IJ23 JKL,Scania,R500,2023,Alan Hughes,Active,2026-08-01,2026-01-01,https://drive.google.com/example

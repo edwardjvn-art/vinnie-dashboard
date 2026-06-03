@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Tasks — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Tasks</div>
+    <div class="page-sub">{{ today }}</div>
+  </div>
+
+  <div class="metrics metrics-3" style="margin-bottom:1.75rem;">
+    <div class="metric {% if pending|length > 0 %}accent{% endif %}">
+      <div class="metric-label">Remaining</div>
+      <div class="metric-value">{{ pending|length }}</div>
+      <div class="metric-sub">Today</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Completed</div>
+      <div class="metric-value">{{ completed|length }}</div>
+      <div class="metric-sub">Done</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total</div>
+      <div class="metric-value">{{ total }}</div>
+      <div class="metric-sub">All tasks</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-header"><span class="card-title">Add a task</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('tasks') }}">
+        <input type="hidden" name="action" value="add">
+        <div class="form-row">
+          <div class="form-group" style="flex:4;">
+            <label>Task description</label>
+            <input type="text" name="task" required placeholder="What needs to be done?">
+          </div>
+          <div class="form-group">
+            <label>Tag</label>
+            <select name="tag">
+              <option value="">—</option>
+              <option>Urgent</option><option>Property</option><option>Finance</option>
+              <option>Lorries</option><option>Admin</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <select name="priority">
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="form-group" style="justify-content:flex-end;">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn">Add →</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if pending %}
+  {% for pri, label, cls in [('high','High priority','task-high'),('medium','Medium','task-medium'),('low','Low priority','task-low')] %}
+  {% set group = pending | selectattr('1.priority', 'equalto', pri) | list if pending else [] %}
+  {% if group %}
+  <div class="task-section">
+    <div class="task-section-label {{ cls }}">{{ label }}</div>
+    {% for idx, t in group %}
+    <div class="task-item">
+      <div class="task-dot dot-{{ pri }}"></div>
+      <span class="task-text">{{ t.task }}</span>
+      {% if t.tag %}<span class="task-tag">{{ t.tag }}</span>{% endif %}
+      <span class="task-by">{{ t.get('added_by','') }}</span>
+      <form method="POST" action="{{ url_for('tasks') }}" style="margin-left:8px;">
+        <input type="hidden" name="action" value="toggle">
+        <input type="hidden" name="idx" value="{{ idx }}">
+        <button type="submit" class="btn btn-sm btn-ghost" style="padding:4px 10px;font-size:0.72rem;">✓ Done</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% else %}
+  <div class="empty" style="padding:3rem;background:white;border:1px solid #EAECF0;border-radius:12px;">
+    All tasks completed today ✓
+  </div>
+  {% endif %}
+
+  {% if completed %}
+  <details style="margin-top:1.5rem;">
+    <summary style="font-size:0.82rem;font-weight:600;color:#9CA3AF;cursor:pointer;padding:10px 0;">Completed ({{ completed|length }})</summary>
+    <div style="margin-top:0.75rem;">
+      {% for idx, t in completed %}
+      <div class="task-item task-done">
+        <div class="task-dot" style="background:#D1D5DB;"></div>
+        <span class="task-text">{{ t.task }}</span>
+        <span class="task-by">{{ t.get('added_by','') }}</span>
+        <form method="POST" action="{{ url_for('tasks') }}" style="margin-left:8px;">
+          <input type="hidden" name="action" value="undo">
+          <input type="hidden" name="idx" value="{{ idx }}">
+          <button type="submit" class="btn btn-sm btn-ghost" style="padding:4px 10px;font-size:0.72rem;">Undo</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+
+</div>
+{% endblock %}

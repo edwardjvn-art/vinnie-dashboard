@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Overview — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">Good morning, James 👋</div>
+    <div class="page-sub">{{ today }}</div>
+  </div>
+
+  {% if urgent_alerts %}
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header">
+      <span class="card-title" style="color:#DC2626;">Urgent — needs attention</span>
+    </div>
+    <div class="card-body" style="padding-top:0.75rem;padding-bottom:0.75rem;">
+      {% for a in urgent_alerts %}
+      <div class="alert-item alert-high">
+        <span class="alert-icon">{{ a.icon }}</span>
+        <div>
+          <div class="alert-title">{{ a.title }}</div>
+          <div class="alert-sub">{{ a.sub }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="metrics metrics-5">
+    <div class="metric accent">
+      <div class="metric-label">Properties</div>
+      <div class="metric-value">{{ occupied|length }}/{{ props|length }}</div>
+      <div class="metric-sub">{{ props|length - occupied|length }} vacant</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Monthly Rent</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_rent) }}</div>
+      <div class="metric-sub">This month</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Mortgages</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_mtg) }}</div>
+      <div class="metric-sub">Per month</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Net Cash Flow</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(net_cf) }}</div>
+      <div class="metric-up">↑ After all mortgages</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Alerts</div>
+      <div class="metric-value">{{ alerts|length }}</div>
+      <div class="metric-sub">{{ urgent_alerts|length }} urgent</div>
+    </div>
+  </div>
+
+  <div class="grid-60-40" style="margin-bottom:1.25rem;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Cash Flow — Last 6 Months</span></div>
+      <div class="card-body"><div class="chart-wrap"><canvas id="cfChart"></canvas></div></div>
+    </div>
+    <div class="stack">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Rent Status</span></div>
+        <div class="card-body">
+          {% for p in props %}
+          {% set rent = p.monthly_rent if p.monthly_rent and p.monthly_rent == p.monthly_rent else 0 %}
+          <div class="list-row">
+            <div>
+              <div class="list-row-title">{{ p.address.split(',')[0] }}</div>
+              <div class="list-row-sub">£{{ "{:,.0f}".format(rent|float) }}/mo</div>
+            </div>
+            <div class="list-row-right">
+              {% if p.rent_status == 'Paid' %}<span class="pill pill-green">Paid</span>
+              {% elif p.rent_status == 'Due' %}<span class="pill pill-orange">Due</span>
+              {% elif p.rent_status == 'Overdue' %}<span class="pill pill-red">Overdue</span>
+              {% else %}<span class="pill pill-grey">Vacant</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-60-40">
+    <div class="metrics metrics-3">
+      <div class="metric">
+        <div class="metric-label">Fuel This Month</div>
+        <div class="metric-value">£{{ "{:,.0f}".format(total_fuel) }}</div>
+        <div class="metric-sub">All lorries</div>
+      </div>
+      <div class="metric green">
+        <div class="metric-label">VAT Reclaimable</div>
+        <div class="metric-value">£{{ "{:,.0f}".format(total_vat) }}</div>
+        <div class="metric-sub">On fuel</div>
+      </div>
+      <div class="metric {% if out_total > 0 %}orange{% endif %}">
+        <div class="metric-label">Outstanding Invoices</div>
+        <div class="metric-value">£{{ "{:,.0f}".format(out_total) }}</div>
+        <div class="metric-sub">Lorries</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Tasks Today</span>
+        <span class="pill pill-teal">{{ pending_tasks|length }} remaining</span>
+      </div>
+      <div class="card-body">
+        {% if pending_tasks %}
+        {% for t in pending_tasks %}
+        <div class="task-item">
+          <div class="task-dot dot-{{ t.get('priority','low') }}"></div>
+          <span class="task-text">{{ t.task }}</span>
+          <span class="task-by">{{ t.get('added_by','') }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty" style="padding:1rem 0;">All tasks completed ✓</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const cf = {{ cashflow | tojson }};
+new Chart(document.getElementById('cfChart'), {
+  type: 'bar',
+  data: {
+    labels: cf.map(d => d.month),
+    datasets: [
+      { label: 'Income', data: cf.map(d => d.income), backgroundColor: 'rgba(26,180,215,0.8)', borderRadius: 4 },
+      { label: 'Expenses', data: cf.map(d => d.expenses), backgroundColor: 'rgba(229,231,235,0.9)', borderRadius: 4 },
+      { label: 'Net', data: cf.map(d => d.net), type: 'line', borderColor: '#10B981', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#10B981', tension: 0.3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: { grid: { color: '#F3F4F6' }, ticks: { callback: v => '£'+v.toLocaleString(), font: { size: 11 } } }
+    }
+  }
+});
+</script>
+{% endblock %}

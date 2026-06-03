@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Maintenance — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header"><div class="page-title">Maintenance</div></div>
+
+  <div class="metrics metrics-3">
+    <div class="metric {% if ip|length > 0 %}orange{% endif %}">
+      <div class="metric-label">Open Issues</div>
+      <div class="metric-value">{{ ip|length }}</div>
+      <div class="metric-sub">Need attention</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Completed</div>
+      <div class="metric-value">{{ comp|length }}</div>
+      <div class="metric-sub">This year</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total Cost YTD</div>
+      <div class="metric-value">£{{ "{:,.2f}".format(total_cost) }}</div>
+      <div class="metric-sub">All properties</div>
+    </div>
+  </div>
+
+  {% if ip %}
+  <div class="card" style="margin-top:1.5rem;margin-bottom:1.25rem;">
+    <div class="card-header"><span class="card-title" style="color:#D97706;">Open Issues</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Property</th><th>Issue</th><th>Date</th><th>Cost</th><th>Notes</th><th>By</th></tr></thead>
+        <tbody>
+          {% for m in ip %}
+          <tr>
+            <td><strong>{{ m.property.split(',')[0] }}</strong></td>
+            <td>{{ m.issue }}</td>
+            <td class="td-muted">{{ m.date }}</td>
+            <td>{% if m.cost and m.cost|float > 0 %}£{{ "{:,.2f}".format(m.cost|float) }}{% else %}TBC{% endif %}</td>
+            <td class="td-muted">{{ m.notes }}</td>
+            <td class="td-muted">{{ m.logged_by }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-header"><span class="card-title">Log New Issue</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('maintenance') }}">
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label>Property</label>
+            <select name="property">
+              {% for p in props %}<option>{{ p.address }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label>Issue description</label>
+            <input type="text" name="issue" required placeholder="e.g. Boiler not working">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option>In Progress</option>
+              <option>Completed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cost £</label>
+            <input type="number" name="cost" value="0" min="0" step="10">
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <input type="text" name="notes" placeholder="Notes">
+          </div>
+          <div class="form-group" style="justify-content:flex-end;">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn">Log issue</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if comp %}
+  <details>
+    <summary style="font-size:0.82rem;font-weight:600;color:#9CA3AF;cursor:pointer;padding:10px 0;">Completed ({{ comp|length }})</summary>
+    <div class="card" style="margin-top:0.75rem;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Property</th><th>Issue</th><th>Date</th><th>Cost</th><th>Notes</th></tr></thead>
+          <tbody>
+            {% for m in comp %}
+            <tr>
+              <td>{{ m.property.split(',')[0] }}</td>
+              <td>{{ m.issue }}</td>
+              <td class="td-muted">{{ m.date }}</td>
+              <td>{% if m.cost and m.cost|float > 0 %}£{{ "{:,.2f}".format(m.cost|float) }}{% else %}—{% endif %}</td>
+              <td class="td-muted">{{ m.notes }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+  {% endif %}
+
+</div>
+{% endblock %}

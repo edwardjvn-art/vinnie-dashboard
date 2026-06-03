@@ -1,0 +1,7 @@
+property,address,bedrooms,monthly_rent,rent_status,tenancy_end,mortgage_lender,mortgage_balance,mortgage_rate,mortgage_monthly,mortgage_type,mortgage_end,mortgage_doc_link,tenancy_doc_link,insurance_doc_link
+14 Maple Street Bristol,14 Maple Street Bristol,2,1400,Paid,2025-12-01,Barclays,180000,3.5,820,Fixed,2031-01-01,https://drive.google.com/example,https://drive.google.com/example,https://drive.google.com/example
+7 Oak Lane Manchester,7 Oak Lane Manchester,3,1650,Due,2026-03-01,NatWest,245000,4.1,1100,Tracker,2030-06-01,https://drive.google.com/example,https://drive.google.com/example,https://drive.google.com/example
+22 High Road Leeds,22 High Road Leeds,1,950,Paid,2025-08-01,HSBC,112000,3.9,640,Fixed,2029-01-01,https://drive.google.com/example,https://drive.google.com/example,https://drive.google.com/example
+3 Church View Exeter,3 Church View Exeter,0,,Vacant,,Lloyds,95000,4.2,480,Tracker,2028-01-01,https://drive.google.com/example,,https://drive.google.com/example
+55 Park Avenue Bath,55 Park Avenue Bath,4,2200,Paid,2026-01-01,Lloyds,390000,3.2,1850,Fixed,2034-01-01,https://drive.google.com/example,https://drive.google.com/example,https://drive.google.com/example
+9 River Close Norwich,9 River Close Norwich,2,1100,Paid,2025-09-01,Santander,158000,4.4,890,Tracker,2030-01-01,https://drive.google.com/example,https://drive.google.com/example,https://drive.google.com/example

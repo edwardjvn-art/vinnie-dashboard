@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Vinnie Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Vinnie">
+  <meta name="theme-color" content="#1AB4D7">
+  <link rel="apple-touch-icon" href="/static/icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/static/icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/static/icons/icon-120.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-dot"></div>
+      Vinnie Dashboard
+    </div>
+    <div class="nav-links">
+      {% set nav_items = [
+        ('overview',     'Overview'),
+        ('properties',   'Properties'),
+        ('mortgages',    'Mortgages'),
+        ('finance',      'Finance'),
+        ('lorries',      'Lorries'),
+        ('tasks',        'Tasks'),
+        ('alerts_page',  'Alerts'),
+        ('maintenance',  'Maintenance'),
+      ] %}
+      {% for route, label in nav_items %}
+      <a href="{{ url_for(route) }}" class="nav-link {% if page == route.replace('_page','') or page == route %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    <div class="nav-right">
+      <span class="nav-user">👑 James</span>
+      <a href="{{ url_for('logout') }}" class="nav-signout">Sign out</a>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">Vinnie Dashboard · {{ now }}</footer>
+
+</div>
+{% block scripts %}{% endblock %}
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/sw.js');
+}
+</script>
+</body>
+</html>

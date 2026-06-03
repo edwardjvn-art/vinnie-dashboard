@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Lorries — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header"><div class="page-title">Lorries & Fleet</div></div>
+
+  <div class="metrics metrics-4">
+    <div class="metric accent">
+      <div class="metric-label">Active Lorries</div>
+      <div class="metric-value">{{ active }}/{{ lorries|length }}</div>
+      <div class="metric-sub">Fleet status</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Fuel This Month</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_fuel) }}</div>
+      <div class="metric-sub">All vehicles</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">VAT Reclaimable</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_vat) }}</div>
+      <div class="metric-sub">On fuel</div>
+    </div>
+    <div class="metric {% if out_total > 0 %}orange{% endif %}">
+      <div class="metric-label">Outstanding Invoices</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(out_total) }}</div>
+      <div class="metric-sub">Awaiting payment</div>
+    </div>
+  </div>
+
+  <div class="grid-40-60">
+    <div>
+      <div class="card-title" style="margin-bottom:0.75rem;">Fleet</div>
+      {% for l in lorries %}
+      <a href="{{ url_for('lorry_detail', lorry_id=l.lorry_id) }}" class="item-card">
+        <div>
+          <div class="item-card-title">{{ l.reg }} — {{ l.make }} {{ l.model }}</div>
+          <div class="item-card-sub">{{ l.driver }} · {{ l.year }}</div>
+        </div>
+        <div class="item-card-right">
+          {% if l.status == 'Active' %}<span class="pill pill-green">Active</span>
+          {% else %}<span class="pill pill-orange">{{ l.status }}</span>{% endif %}
+          <span class="open-arrow">Open →</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Fuel Spend by Lorry</span></div>
+        <div class="card-body"><div class="chart-wrap-sm"><canvas id="fuelChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent Invoices</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Invoice</th><th>Lorry</th><th>Client</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for inv in invoices %}
+              <tr>
+                <td class="td-muted">{{ inv.invoice_id }}</td>
+                <td>{{ inv.reg }}</td>
+                <td>{{ inv.client }}</td>
+                <td class="td-bold">£{{ "{:,.0f}".format(inv.amount_gbp|float) }}</td>
+                <td>
+                  {% if inv.status == 'Paid' %}<span class="pill pill-green">Paid</span>
+                  {% else %}<span class="pill pill-orange">Outstanding</span>{% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const fuelData = {{ fuel_by_lorry | tojson }};
+new Chart(document.getElementById('fuelChart'), {
+  type: 'bar',
+  data: {
+    labels: Object.keys(fuelData),
+    datasets: [{ data: Object.values(fuelData), backgroundColor: 'rgba(26,180,215,0.8)', borderRadius: 4, label: 'Fuel cost' }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: { grid: { color: '#F3F4F6' }, ticks: { callback: v => '£'+v.toLocaleString(), font: { size: 11 } } }
+    }
+  }
+});
+</script>
+{% endblock %}

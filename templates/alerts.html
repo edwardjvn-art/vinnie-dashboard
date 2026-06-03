@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Alerts — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Alerts</div>
+    <div class="page-sub">{{ alerts|length }} total · {{ high|length }} urgent</div>
+  </div>
+
+  {% if high %}
+  <div class="alert-section-label label-high">🔴 Urgent</div>
+  {% for a in high %}
+  <div class="alert-item alert-high">
+    <span class="alert-icon">{{ a.icon }}</span>
+    <div><div class="alert-title">{{ a.title }}</div><div class="alert-sub">{{ a.sub }}</div></div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if med %}
+  <div class="alert-section-label label-med">⚠️ Attention needed</div>
+  {% for a in med %}
+  <div class="alert-item alert-med">
+    <span class="alert-icon">{{ a.icon }}</span>
+    <div><div class="alert-title">{{ a.title }}</div><div class="alert-sub">{{ a.sub }}</div></div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if low %}
+  <div class="alert-section-label label-low">ℹ️ For your information</div>
+  {% for a in low %}
+  <div class="alert-item alert-low">
+    <span class="alert-icon">{{ a.icon }}</span>
+    <div><div class="alert-title">{{ a.title }}</div><div class="alert-sub">{{ a.sub }}</div></div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if not alerts %}
+  <div class="empty" style="background:white;border:1px solid #EAECF0;border-radius:12px;padding:3rem;">
+    ✅ No alerts — everything looks good!
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
