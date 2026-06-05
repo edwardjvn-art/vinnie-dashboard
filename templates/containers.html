@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Containers — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Containers</div>
+    <div class="page-sub">Storage and shipping container portfolio</div>
+  </div>
+
+  <div class="metrics metrics-4">
+    <div class="metric accent">
+      <div class="metric-label">Total Containers</div>
+      <div class="metric-value">{{ containers|length }}</div>
+      <div class="metric-sub">In portfolio</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Occupied</div>
+      <div class="metric-value">{{ containers|selectattr('status','equalto','Occupied')|list|length }}</div>
+      <div class="metric-sub">Currently rented</div>
+    </div>
+    <div class="metric orange">
+      <div class="metric-label">Vacant</div>
+      <div class="metric-value">{{ containers|selectattr('status','equalto','Vacant')|list|length }}</div>
+      <div class="metric-sub">Available</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Monthly Income</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_income) }}</div>
+      <div class="metric-sub">From containers</div>
+    </div>
+  </div>
+
+  {% if containers %}
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Container ID</th>
+            <th>Location</th>
+            <th>Size</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Monthly Income</th>
+            <th>Tenant / User</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in containers %}
+          <tr>
+            <td><strong>{{ c.container_id }}</strong></td>
+            <td>{{ c.location }}</td>
+            <td>{{ c.size }}</td>
+            <td>{{ c.type }}</td>
+            <td>
+              {% if c.status == 'Occupied' %}<span class="pill pill-green">Occupied</span>
+              {% elif c.status == 'Vacant' %}<span class="pill pill-orange">Vacant</span>
+              {% elif c.status == 'Maintenance' %}<span class="pill pill-red">Maintenance</span>
+              {% else %}<span class="pill pill-grey">{{ c.status }}</span>{% endif %}
+            </td>
+            <td class="td-bold">{% if c.monthly_income %}£{{ "{:,.0f}".format(c.monthly_income|float) }}{% else %}—{% endif %}</td>
+            <td class="td-muted">{{ c.tenant or '—' }}</td>
+            <td class="td-muted">{{ c.notes or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div style="background:white;border:1px solid #EAECF0;border-radius:12px;padding:3rem;text-align:center;margin-bottom:1.25rem;">
+    <div style="font-size:2rem;margin-bottom:0.75rem;">📦</div>
+    <div style="font-size:1rem;font-weight:600;color:#111827;margin-bottom:0.5rem;">No containers added yet</div>
+    <div style="font-size:0.85rem;color:#9CA3AF;">Use the form below to add containers once details are confirmed with Vinnie</div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Add Container</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('containers') }}">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Container ID</label>
+            <input type="text" name="container_id" placeholder="e.g. C001">
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" name="location" placeholder="e.g. West Row Site">
+          </div>
+          <div class="form-group">
+            <label>Size</label>
+            <input type="text" name="size" placeholder="e.g. 20ft, 40ft">
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select name="type">
+              <option value="">— Select —</option>
+              <option>Storage</option>
+              <option>Shipping</option>
+              <option>Refrigerated</option>
+              <option>Office</option>
+              <option>Workshop</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option>Occupied</option>
+              <option>Vacant</option>
+              <option>Maintenance</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monthly Income £</label>
+            <input type="number" name="monthly_income" placeholder="0" min="0" step="50">
+          </div>
+          <div class="form-group">
+            <label>Tenant / User</label>
+            <input type="text" name="tenant" placeholder="Name or company">
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label>Notes</label>
+            <input type="text" name="notes" placeholder="Any additional notes">
+          </div>
+        </div>
+        <button type="submit" class="btn">Add Container</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

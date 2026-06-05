@@ -57,6 +57,16 @@ def load_invoices():
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%d %b")
     return df.to_dict("records")
 
+def load_containers():
+    try:
+        df = pd.read_csv(f"{DATA}/containers.csv")
+        return df.to_dict("records")
+    except:
+        return []
+
+def save_containers(records):
+    pd.DataFrame(records).to_csv(f"{DATA}/containers.csv", index=False)
+
 def load_tasks():
     return pd.read_csv(f"{DATA}/tasks.csv").to_dict("records")
 
@@ -358,6 +368,29 @@ def api_fuel_by_lorry():
     for f in fuel:
         by_lorry[f["reg"]] = by_lorry.get(f["reg"],0) + float(f["cost_gbp"])
     return jsonify([{"reg":k,"cost":v} for k,v in by_lorry.items()])
+
+@app.route("/containers", methods=["GET","POST"])
+@login_required
+def containers():
+    props = load_props()
+    container_list = load_containers()
+    alerts = build_alerts(props, load_lorries(), load_invoices())
+    if request.method == "POST":
+        container_list.append({
+            "container_id": request.form.get("container_id",""),
+            "location":     request.form.get("location",""),
+            "size":         request.form.get("size",""),
+            "type":         request.form.get("type",""),
+            "status":       request.form.get("status","Vacant"),
+            "monthly_income": request.form.get("monthly_income",0),
+            "tenant":       request.form.get("tenant",""),
+            "notes":        request.form.get("notes",""),
+        })
+        save_containers(container_list)
+        return redirect(url_for("containers"))
+    total_income = sum(float(c["monthly_income"]) for c in container_list if c.get("monthly_income"))
+    return render_template("containers.html", page="containers",
+        containers=container_list, total_income=total_income, alerts=alerts)
 
 @app.context_processor
 def inject_now():
