@@ -392,6 +392,52 @@ def containers():
     return render_template("containers.html", page="containers",
         containers=container_list, total_income=total_income, alerts=alerts)
 
+@app.route("/performance")
+@login_required
+def performance():
+    props = load_props()
+    alerts = build_alerts(props, load_lorries(), load_invoices())
+
+    ranked = []
+    for p in props:
+        rent = 0
+        try: rent = float(p.get('monthly_rent', 0)) if str(p.get('monthly_rent','')).strip() not in ['','nan'] else 0
+        except: rent = 0
+
+        mtg = 0
+        try: mtg = float(p.get('mortgage_monthly', 0)) if str(p.get('mortgage_monthly','')).strip() not in ['','nan'] else 0
+        except: mtg = 0
+
+        val = None
+        try:
+            v = p.get('mortgage_balance', '')
+            # Use a rough estimate if no value — skip yield calc
+            val = None
+        except: val = None
+
+        net = rent - mtg
+        yield_pct = None
+
+        ranked.append({
+            'property': p['property'],
+            'est_value': val,
+            'rent': rent,
+            'mortgage_monthly': mtg,
+            'net_monthly': net,
+            'yield_pct': yield_pct,
+            'rent_status': p.get('rent_status',''),
+        })
+
+    ranked.sort(key=lambda x: x['net_monthly'], reverse=True)
+    total_net = sum(r['net_monthly'] for r in ranked)
+    negative_count = len([r for r in ranked if r['net_monthly'] < 0])
+    best  = ranked[0]  if ranked else {'property':'—','net_monthly':0}
+    worst = ranked[-1] if ranked else {'property':'—','net_monthly':0}
+
+    return render_template('performance.html', page='performance',
+        ranked=ranked, total_net=total_net, negative_count=negative_count,
+        best=best, worst=worst, alerts=alerts)
+
 @app.context_processor
 def inject_now():
     return {"now": datetime.now().strftime("%H:%M")}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Portfolio Performance — Vinnie Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Portfolio Performance</div>
+    <div class="page-sub">Ranked by net monthly profit — best to worst performing</div>
+  </div>
+
+  <div class="metrics metrics-4">
+    <div class="metric green">
+      <div class="metric-label">Best Performer</div>
+      <div class="metric-value" style="font-size:1.1rem;">{{ best.property.split(' ')[0] }} {{ best.property.split(' ')[1] if best.property.split(' ')|length > 1 else '' }}</div>
+      <div class="metric-up">↑ £{{ "{:,.0f}".format(best.net_monthly) }}/mo profit</div>
+    </div>
+    <div class="metric red">
+      <div class="metric-label">Worst Performer</div>
+      <div class="metric-value" style="font-size:1.1rem;">{{ worst.property.split(' ')[0] }} {{ worst.property.split(' ')[1] if worst.property.split(' ')|length > 1 else '' }}</div>
+      <div class="metric-down">↓ £{{ "{:,.0f}".format(worst.net_monthly) }}/mo</div>
+    </div>
+    <div class="metric orange">
+      <div class="metric-label">Negative Yield</div>
+      <div class="metric-value">{{ negative_count }}</div>
+      <div class="metric-sub">Properties costing money</div>
+    </div>
+    <div class="metric accent">
+      <div class="metric-label">Total Net Profit</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_net) }}/mo</div>
+      <div class="metric-sub">After all mortgages</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Property</th>
+            <th>Est. Value</th>
+            <th>Monthly Rent</th>
+            <th>Mortgage/mo</th>
+            <th>Net Profit/mo</th>
+            <th>Annual Yield</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in ranked %}
+          <tr>
+            <td>
+              {% if loop.index == 1 %}
+                <span style="font-size:1.1rem;">🥇</span>
+              {% elif loop.index == 2 %}
+                <span style="font-size:1.1rem;">🥈</span>
+              {% elif loop.index == 3 %}
+                <span style="font-size:1.1rem;">🥉</span>
+              {% else %}
+                <span style="color:#9CA3AF;font-weight:600;">{{ loop.index }}</span>
+              {% endif %}
+            </td>
+            <td><strong>{{ p.property }}</strong></td>
+            <td class="td-muted">{% if p.est_value %}£{{ "{:,.0f}".format(p.est_value) }}{% else %}—{% endif %}</td>
+            <td style="font-weight:600;">{% if p.rent %}£{{ "{:,.0f}".format(p.rent) }}{% else %}<span style="color:#EF4444;">£0</span>{% endif %}</td>
+            <td class="td-muted">£{{ "{:,.0f}".format(p.mortgage_monthly) }}</td>
+            <td>
+              {% if p.net_monthly > 0 %}
+                <span style="color:#059669;font-weight:700;">+£{{ "{:,.0f}".format(p.net_monthly) }}</span>
+              {% elif p.net_monthly == 0 %}
+                <span style="color:#9CA3AF;font-weight:600;">£0</span>
+              {% else %}
+                <span style="color:#EF4444;font-weight:700;">-£{{ "{:,.0f}".format(p.net_monthly|abs) }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if p.yield_pct %}
+                {% if p.yield_pct >= 5 %}
+                  <span style="color:#059669;font-weight:600;">{{ "%.1f"|format(p.yield_pct) }}%</span>
+                {% elif p.yield_pct >= 3 %}
+                  <span style="color:#D97706;font-weight:600;">{{ "%.1f"|format(p.yield_pct) }}%</span>
+                {% else %}
+                  <span style="color:#EF4444;font-weight:600;">{{ "%.1f"|format(p.yield_pct) }}%</span>
+                {% endif %}
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if p.rent_status == 'Overdue' %}<span class="pill pill-red">Overdue</span>
+              {% elif p.rent_status == 'Vacant' %}<span class="pill pill-grey">Vacant</span>
+              {% elif p.net_monthly < 0 %}<span class="pill pill-red">Loss</span>
+              {% elif p.yield_pct and p.yield_pct < 3 %}<span class="pill pill-orange">Low yield</span>
+              {% else %}<span class="pill pill-green">Good</span>{% endif %}
+            </td>
+            <td>
+              {% if p.net_monthly < 0 %}
+                <span style="font-size:0.78rem;color:#EF4444;font-weight:600;">⚠️ Review</span>
+              {% elif p.rent_status == 'Vacant' %}
+                <span style="font-size:0.78rem;color:#D97706;font-weight:600;">📢 Let it</span>
+              {% elif p.yield_pct and p.yield_pct < 3 %}
+                <span style="font-size:0.78rem;color:#D97706;font-weight:600;">💷 Raise rent</span>
+              {% else %}
+                <span style="font-size:0.78rem;color:#059669;">✓ Hold</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Yield explanation -->
+  <div class="grid-3" style="margin-top:1.25rem;">
+    <div class="card">
+      <div class="card-header"><span class="card-title" style="color:#059669;">🟢 Good yield (5%+)</span></div>
+      <div class="card-body">
+        {% for p in ranked if p.yield_pct and p.yield_pct >= 5 %}
+        <div class="list-row">
+          <span style="font-size:0.85rem;font-weight:500;">{{ p.property }}</span>
+          <span style="color:#059669;font-weight:700;">{{ "%.1f"|format(p.yield_pct) }}%</span>
+        </div>
+        {% else %}
+        <div style="color:#9CA3AF;font-size:0.84rem;padding:8px 0;">None above 5% yet</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title" style="color:#D97706;">🟡 Average yield (3-5%)</span></div>
+      <div class="card-body">
+        {% for p in ranked if p.yield_pct and p.yield_pct >= 3 and p.yield_pct < 5 %}
+        <div class="list-row">
+          <span style="font-size:0.85rem;font-weight:500;">{{ p.property }}</span>
+          <span style="color:#D97706;font-weight:700;">{{ "%.1f"|format(p.yield_pct) }}%</span>
+        </div>
+        {% else %}
+        <div style="color:#9CA3AF;font-size:0.84rem;padding:8px 0;">None in this range</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title" style="color:#EF4444;">🔴 Poor / negative yield</span></div>
+      <div class="card-body">
+        {% for p in ranked if p.yield_pct and p.yield_pct < 3 or p.net_monthly < 0 %}
+        <div class="list-row">
+          <span style="font-size:0.85rem;font-weight:500;">{{ p.property }}</span>
+          <span style="color:#EF4444;font-weight:700;">{% if p.yield_pct %}{{ "%.1f"|format(p.yield_pct) }}%{% else %}—{% endif %}</span>
+        </div>
+        {% else %}
+        <div style="color:#9CA3AF;font-size:0.84rem;padding:8px 0;">No underperformers</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
