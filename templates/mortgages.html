@@ -49,7 +49,7 @@
             <td>{{ p.mortgage_rate }}%</td>
             <td class="td-bold">£{{ "{:,.0f}".format(p.mortgage_balance|float) }}</td>
             <td class="td-bold">£{{ "{:,.0f}".format(p.mortgage_monthly|float) }}</td>
-            <td class="td-muted">{{ p.mortgage_end[:7] if p.mortgage_end else '—' }}</td>
+            <td class="td-muted">{{ p.mortgage_end|string|truncate(7, True, '') if p.mortgage_end and p.mortgage_end|string != 'nan' else '—' }}</td>
             <td>
               {% if p.mortgage_doc_link and p.mortgage_doc_link != 'nan' %}
               <a href="{{ p.mortgage_doc_link }}" target="_blank" style="color:#1AB4D7;font-size:0.8rem;font-weight:500;">View →</a>
