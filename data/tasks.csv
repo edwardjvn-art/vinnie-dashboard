@@ -1,7 +1,11 @@
 task,done,tag,priority,added_by,date_added
-Chase Oak Lane rent payment,False,Finance,high,Assistant,2025-05-29
-List Church View on Rightmove,False,Property,high,Assistant,2025-05-29
-Review NatWest tracker options,False,Finance,medium,James,2025-05-29
-Call insurance broker,False,Admin,low,Assistant,2025-05-29
-Sign lease renewal Maple St,True,,medium,Assistant,2025-05-28
-Call boiler engineer High Road,True,,low,Assistant,2025-05-27
+Chase squatters legal action at The Shed,False,Urgent,high,James,2026-06-05
+Confirm mortgage rates for all properties,False,Finance,high,James,2026-06-05
+Confirm Ponderosa Annex mortgage details,False,Finance,medium,James,2026-06-05
+Clarify Airview £1333 monthly payment,False,Finance,medium,James,2026-06-05
+Get lorry registration numbers from Vinnie,False,Lorries,medium,James,2026-06-05
+Pay K&M Tyres outstanding balance £507.42,False,Finance,high,James,2026-06-05
+Set up Google Drive folder structure,False,Admin,medium,James,2026-06-05
+Get tenant details for all properties,False,Property,medium,James,2026-06-05
+Set up Tailscale on office computer,False,Admin,low,James,2026-06-05
+Tate Fleet fuel invoice due 05 June 2026,False,Finance,high,James,2026-06-05

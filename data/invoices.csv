@@ -1,11 +1,2 @@
 invoice_id,date,lorry_id,reg,client,destination,amount_gbp,vat_gbp,status,doc_link
-INV-001,5/1/25,L001,AB21 XYZ,Tesco Distribution,Bristol DC,1850,308.33,Paid,https://drive.google.com/example
-INV-002,5/3/25,L002,CD22 ABC,Amazon Logistics,Manchester FC,2100,350,Paid,https://drive.google.com/example
-INV-003,5/5/25,L003,EF19 DEF,DHL Supply Chain,Leeds Hub,1950,325,Paid,https://drive.google.com/example
-INV-004,5/8/25,L001,AB21 XYZ,Asda Transport,London Gateway,2300,383.33,Paid,https://drive.google.com/example
-INV-005,5/10/25,L005,IJ23 JKL,Royal Mail,Birmingham NDC,1750,291.67,Paid,https://drive.google.com/example
-INV-006,5/12/25,L002,CD22 ABC,Tesco Distribution,Liverpool DC,2050,341.67,Outstanding,https://drive.google.com/example
-INV-007,5/15/25,L001,AB21 XYZ,Amazon Logistics,Bristol FC,1900,316.67,Outstanding,https://drive.google.com/example
-INV-008,5/18/25,L003,EF19 DEF,DHL Supply Chain,Sheffield Hub,2200,366.67,Outstanding,https://drive.google.com/example
-INV-009,5/20/25,L005,IJ23 JKL,Asda Transport,Nottingham DC,1800,300,Paid,https://drive.google.com/example
-INV-010,5/22/25,L002,CD22 ABC,Royal Mail,Leeds NDC,2150,358.33,Outstanding,https://drive.google.com/example
+INV6409223,2026-06-02,L001,Fleet,Tate Fleet,Fuel,2794.39,558.88,Outstanding,
