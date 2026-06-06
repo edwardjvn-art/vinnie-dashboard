@@ -303,7 +303,7 @@ footer { display: none; }
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-const mapData = {{ map_data_json | safe }};
+document.addEventListener("DOMContentLoaded", function() {
 
 const map = L.map('map', {
   center: [52.39, 0.56],
@@ -396,5 +396,6 @@ if (mapData.length > 0) {
   const bounds = L.latLngBounds(mapData.map(p => [p.lat, p.lng]));
   map.fitBounds(bounds, { padding: [80, 80] });
 }
+});
 </script>
 {% endblock %}
