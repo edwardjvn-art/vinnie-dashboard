@@ -4,7 +4,7 @@ property,address,bedrooms,monthly_rent,rent_status,tenancy_end,mortgage_lender,m
 22 Fleming Avenue Mildenhall,22 Fleming Avenue Mildenhall IP28 7NF,2,600,Paid,SPT,TMW,111000,,432.67,Unknown,,,,
 1 Bernards Close Mildenhall,1 Bernards Close Mildenhall IP28 8UN,3,2400,Paid,07/2027,NatWest,251000,,1089.09,Unknown,2027-07-01,,,
 3 Bernards Close Mildenhall,3 Bernards Close Mildenhall IP28 8UN,3,2400,Paid,06/2027,Barclays,342000,,1380.27,Unknown,2027-06-01,,,
-4 Bernards Close Mildenhall,4 Bernards Close Mildenhall IP28 8UN,3,2900,Paid,08/2025,NatWest,340000,,1475.50,Unknown,2025-08-01,,,
+4 Bernards Close Mildenhall,4 Bernards Close Mildenhall IP28 8UN,3,2400,Paid,08/2025,NatWest,340000,,1475.50,Unknown,2025-08-01,,,
 1A Vinrose Lodge Mildenhall,1A Vinrose Lodge Mildenhall IP28 7JJ,2,1200,Paid,02/2026,None,0,,0,Owned,,,,
 5a Beeches Road West Row,5a Beeches Road West Row IP28 8NP,2,1200,Paid,03/2026,Handelsbanken,80000,,745.78,Unknown,2026-03-01,,,
 5b Beeches Road West Row,5b Beeches Road West Row IP28 8NP,2,1200,Paid,11/2025,Handelsbanken,80000,,745.78,Unknown,2025-11-01,,,
