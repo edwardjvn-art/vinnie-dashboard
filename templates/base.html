@@ -3,29 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Vinnie Dashboard{% endblock %}</title>
+  <title>{% block title %}VS — Vinnie Shipp{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="manifest" href="/static/manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Vinnie">
-  <meta name="theme-color" content="#1AB4D7">
-  <link rel="apple-touch-icon" href="/static/icons/icon-180.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="/static/icons/icon-152.png">
-  <link rel="apple-touch-icon" sizes="120x120" href="/static/icons/icon-120.png">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-{% block extra_head %}{% endblock %}
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
 <div class="layout">
-
   <nav class="nav">
-    <div class="nav-logo">
-      <div class="nav-logo-dot"></div>
-      Vinnie Dashboard
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <span class="nav-logo-vs">VS</span>
+      </div>
+      <div class="nav-divider"></div>
+      <span class="nav-name">Vinnie Shipp</span>
     </div>
-    <div class="nav-links">
-      {% set nav_items = [
+
+    <ul class="nav-links">
+      {% set links = [
         ('overview',     'Overview'),
         ('properties',   'Properties'),
         ('mortgages',    'Mortgages'),
@@ -36,29 +31,23 @@
         ('containers',   'Containers'),
         ('performance',  'Performance'),
         ('maintenance',  'Maintenance'),
+        ('property_map', 'Map'),
       ] %}
-      {% for route, label in nav_items %}
-      <a href="{{ url_for(route) }}" class="nav-link {% if page == route.replace('_page','') or page == route %}active{% endif %}">{{ label }}</a>
+      {% for endpoint, label in links %}
+      <li><a href="{{ url_for(endpoint) }}" class="{{ 'active' if page == endpoint else '' }}">{{ label }}</a></li>
       {% endfor %}
-    </div>
-    <div class="nav-right">
-      <span class="nav-user">👑 James</span>
+    </ul>
+
+    <div class="nav-user">
+      <span class="nav-user-name">Vinnie</span>
       <a href="{{ url_for('logout') }}" class="nav-signout">Sign out</a>
     </div>
   </nav>
 
-  <main>
+  <div class="pw">
     {% block content %}{% endblock %}
-  </main>
-
-  <footer class="footer">Vinnie Dashboard · {{ now }}</footer>
-
+  </div>
 </div>
 {% block scripts %}{% endblock %}
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/static/sw.js');
-}
-</script>
 </body>
 </html>

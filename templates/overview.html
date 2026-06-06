@@ -1,13 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Overview — Vinnie Dashboard{% endblock %}
 
-{% block extra_head %}
-<style>
-.pw { padding: 0; overflow: hidden; }
-footer { display: none; }
-</style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-{% endblock %}
 {% block content %}
 <style>
   .pw { padding: 0 !important; }
@@ -36,17 +29,17 @@ footer { display: none; }
     gap: 8px;
   }
   .mf-card {
-    background: white;
+    background: #F8F4EC;
     border-radius: 10px;
     padding: 10px 14px;
     min-width: 150px;
-    border: 1px solid rgba(0,0,0,0.07);
+    border: 0.5px solid #DDD5C0;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
   }
   .mf-label {
     font-size: 9px;
     font-weight: 600;
-    color: #9CA3AF;
+    color: #8A9BB0;
     text-transform: uppercase;
     letter-spacing: 0.07em;
     margin-bottom: 3px;
@@ -54,15 +47,15 @@ footer { display: none; }
   .mf-value {
     font-size: 1.35rem;
     font-weight: 700;
-    color: #111827;
+    color: #1C2B4A;
     letter-spacing: -0.02em;
     line-height: 1;
   }
   .mf-sub { font-size: 9px; margin-top: 3px; }
-  .mf-green { color: #22C55E; }
+  .mf-green { color: #1A7A4A; }
   .mf-teal  { color: #1AB4D7; }
-  .mf-red   { color: #EF4444; }
-  .mf-grey  { color: #9CA3AF; }
+  .mf-red   { color: #C0392B; }
+  .mf-grey  { color: #8A9BB0; }
 
   /* Alerts — top right */
   .alerts-float {
@@ -70,10 +63,10 @@ footer { display: none; }
     width: 210px;
   }
   .alert-card {
-    background: white;
+    background: #F8F4EC;
     border-radius: 10px;
     padding: 10px 14px;
-    border: 1px solid rgba(0,0,0,0.07);
+    border: 0.5px solid #DDD5C0;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     margin-bottom: 8px;
   }
@@ -91,10 +84,10 @@ footer { display: none; }
     padding: 5px 0;
     border-bottom: 1px solid #F3F4F6;
     font-size: 11px;
-    color: #111827;
+    color: #1C2B4A;
   }
   .alert-row:last-child { border-bottom: none; }
-  .alert-row-sub { font-size: 10px; color: #9CA3AF; }
+  .alert-row-sub { font-size: 10px; color: #8A9BB0; }
 
   /* Tasks strip — bottom */
   .tasks-float {
@@ -105,10 +98,10 @@ footer { display: none; }
     max-width: 700px;
   }
   .tasks-card {
-    background: white;
+    background: #F8F4EC;
     border-radius: 12px;
     padding: 10px 16px;
-    border: 1px solid rgba(0,0,0,0.07);
+    border: 0.5px solid #DDD5C0;
     box-shadow: 0 2px 16px rgba(0,0,0,0.1);
     display: flex;
     align-items: center;
@@ -119,7 +112,7 @@ footer { display: none; }
   .tasks-label {
     font-size: 9px;
     font-weight: 700;
-    color: #9CA3AF;
+    color: #8A9BB0;
     text-transform: uppercase;
     letter-spacing: 0.07em;
     white-space: nowrap;
@@ -153,13 +146,13 @@ footer { display: none; }
     pointer-events: none;
   }
   .greeting-pill {
-    background: white;
+    background: #F8F4EC;
     border-radius: 20px;
     padding: 7px 18px;
     font-size: 13px;
     font-weight: 600;
-    color: #111827;
-    border: 1px solid rgba(0,0,0,0.07);
+    color: #1C2B4A;
+    border: 0.5px solid #DDD5C0;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     white-space: nowrap;
   }
@@ -171,12 +164,12 @@ footer { display: none; }
     left: 16px;
   }
   .legend-card {
-    background: white;
+    background: #F8F4EC;
     border-radius: 8px;
     padding: 7px 12px;
     display: flex;
     gap: 12px;
-    border: 1px solid rgba(0,0,0,0.07);
+    border: 0.5px solid #DDD5C0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     align-items: center;
   }
@@ -200,11 +193,11 @@ footer { display: none; }
 </style>
 
 <div class="page-wrap">
-  <div id="map" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:1;width:100%;height:100%;"></div>
+  <div id="map"></div>
 
   <!-- Greeting -->
   <div class="overlay greeting-float">
-    <div class="greeting-pill">Good morning, <span>James</span> 👋 &nbsp;·&nbsp; {{ today }}</div>
+    <div class="greeting-pill">Good morning, <span>Vinnie</span> 👋 &nbsp;·&nbsp; {{ today }}</div>
   </div>
 
   <!-- Metric cards -->
@@ -296,38 +289,104 @@ footer { display: none; }
   </div>
 </div>
 
-
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-window.addEventListener('load', function() {
-  var mapData = [{property:"5 Queensway Mildenhall",address:"5 Queensway Mildenhall IP28 7JJ",lat:52.3441,lng:0.5089,monthly_rent:2400,mortgage_monthly:1276,mortgage_lender:"TMB",rent_status:"Paid"},{property:"5 Beeches Road West Row",address:"5 Beeches Road West Row IP28 8NP",lat:52.3612,lng:0.5234,monthly_rent:1800,mortgage_monthly:854,mortgage_lender:"NatWest",rent_status:"Paid"},{property:"22 Fleming Avenue Mildenhall",address:"22 Fleming Avenue Mildenhall IP28 7NF",lat:52.3428,lng:0.5071,monthly_rent:600,mortgage_monthly:433,mortgage_lender:"TMW",rent_status:"Paid"},{property:"1 Bernards Close Mildenhall",address:"1 Bernards Close Mildenhall IP28 8UN",lat:52.3398,lng:0.5102,monthly_rent:2400,mortgage_monthly:1089,mortgage_lender:"NatWest",rent_status:"Paid"},{property:"3 Bernards Close Mildenhall",address:"3 Bernards Close Mildenhall IP28 8UN",lat:52.3399,lng:0.5103,monthly_rent:2400,mortgage_monthly:1380,mortgage_lender:"Barclays",rent_status:"Paid"},{property:"4 Bernards Close Mildenhall",address:"4 Bernards Close Mildenhall IP28 8UN",lat:52.3400,lng:0.5104,monthly_rent:2900,mortgage_monthly:1476,mortgage_lender:"NatWest",rent_status:"Paid"},{property:"1A Vinrose Lodge Mildenhall",address:"1A Vinrose Lodge Mildenhall IP28 7JJ",lat:52.3442,lng:0.5090,monthly_rent:1200,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"5a Beeches Road West Row",address:"5a Beeches Road West Row IP28 8NP",lat:52.3613,lng:0.5235,monthly_rent:1200,mortgage_monthly:746,mortgage_lender:"Handelsbanken",rent_status:"Paid"},{property:"5b Beeches Road West Row",address:"5b Beeches Road West Row IP28 8NP",lat:52.3614,lng:0.5236,monthly_rent:1200,mortgage_monthly:746,mortgage_lender:"Handelsbanken",rent_status:"Paid"},{property:"Ponderosa West Row",address:"Ponderosa West Row IP29 9RF",lat:52.3580,lng:0.5190,monthly_rent:1650,mortgage_monthly:510,mortgage_lender:"TSB",rent_status:"Paid"},{property:"Ponderosa Annex West Row",address:"Ponderosa Annex West Row IP29 9RF",lat:52.3581,lng:0.5191,monthly_rent:1600,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"St Michaels Thetford",address:"St Michaels Thetford IP24 3EG",lat:52.4142,lng:0.7432,monthly_rent:400,mortgage_monthly:516,mortgage_lender:"NatWest",rent_status:"Paid"},{property:"Garrod House Flat 1 Lakenheath",address:"Garrod House Flat 1 Lakenheath IP27 9EW",lat:52.4089,lng:0.5321,monthly_rent:1200,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Garrod House Flat 2 Lakenheath",address:"Garrod House Flat 2 Lakenheath IP27 9EW",lat:52.4090,lng:0.5322,monthly_rent:1200,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Garrod House Flat 3 Lakenheath",address:"Garrod House Flat 3 Lakenheath IP27 9EW",lat:52.4091,lng:0.5323,monthly_rent:1200,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Garrod House Flat B Lakenheath",address:"Garrod House Flat B Lakenheath IP27 9EW",lat:52.4092,lng:0.5324,monthly_rent:1100,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Sparks Farm Hurdle Drove",address:"Sparks Farm Hurdle Drove",lat:52.3901,lng:0.4980,monthly_rent:2400,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Cottage Lakenheath",address:"Cottage Lakenheath",lat:52.4085,lng:0.5318,monthly_rent:1200,mortgage_monthly:350,mortgage_lender:"Private Loan",rent_status:"Paid"},{property:"Airview House West Row",address:"Airview House West Row",lat:52.3615,lng:0.5237,monthly_rent:1250,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Airview Annex West Row",address:"Airview Annex West Row",lat:52.3616,lng:0.5238,monthly_rent:1600,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"The Shed West Row",address:"The Shed West Row IP28 8NY",lat:52.3618,lng:0.5240,monthly_rent:1600,mortgage_monthly:0,mortgage_lender:"",rent_status:"Overdue"}];
-  var map = L.map('map', { center: [52.39, 0.56], zoom: 11, zoomControl: false });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap © CartoDB', subdomains: 'abcd', maxZoom: 19 }).addTo(map);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
-  function getColor(s, l) {
-    if (s==='Overdue') return '#EF4444';
-    if (s==='Due') return '#F59E0B';
-    if (s==='Vacant') return '#6B7280';
-    if (!l||l==='None'||l==='') return '#1AB4D7';
-    return '#22C55E';
-  }
-  function makePin(c, u) {
-    var sz = u ? 34 : 28;
-    return L.divIcon({ className:'', html:'<div style="width:'+sz+'px;height:'+sz+'px;background:'+c+';border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 12px rgba(0,0,0,0.2);"></div>', iconSize:[sz,sz], iconAnchor:[sz/2,sz], popupAnchor:[0,-(sz+4)] });
-  }
-  mapData.forEach(function(p) {
-    var m = L.marker([p.lat, p.lng], { icon: makePin(getColor(p.rent_status, p.mortgage_lender), p.rent_status==='Overdue') });
-    var rent = p.monthly_rent ? '£'+parseFloat(p.monthly_rent).toLocaleString('en-GB',{maximumFractionDigits:0})+'/mo' : 'Vacant';
-    var mtg = p.mortgage_monthly && parseFloat(p.mortgage_monthly)>0 ? '£'+parseFloat(p.mortgage_monthly).toLocaleString('en-GB',{maximumFractionDigits:0})+'/mo' : 'Owned';
-    var net = (parseFloat(p.monthly_rent)||0)-(parseFloat(p.mortgage_monthly)||0);
-    m.bindPopup('<div style="font-family:system-ui,sans-serif;min-width:200px;padding:4px;"><b style="font-size:0.9rem;">'+p.property+'</b><br><br>Rent: <b>'+rent+'</b><br>Mortgage: '+mtg+'<br>Net: <b style="color:'+(net>=0?'#22C55E':'#EF4444')+'">'+(net>=0?'+':'-')+'£'+Math.abs(net).toLocaleString('en-GB',{maximumFractionDigits:0})+'/mo</b><br><br><a href="/property/'+encodeURIComponent(p.address)+'" style="color:#1AB4D7;font-weight:600;">Full details →</a></div>', {maxWidth:250});
-    m.addTo(map);
-  });
-  if (mapData.length>0) { map.fitBounds(L.latLngBounds(mapData.map(function(p){return [p.lat,p.lng];})), {padding:[80,80]}); }
+const mapData = {{ map_data | tojson }};
+
+const map = L.map('map', {
+  center: [52.39, 0.56],
+  zoom: 11,
+  zoomControl: false,
+  scrollWheelZoom: true,
 });
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CartoDB',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+function getColor(status, lender) {
+  if (status === 'Overdue') return '#EF4444';
+  if (status === 'Due')     return '#F59E0B';
+  if (status === 'Vacant')  return '#6B7280';
+  if (lender === 'None' || lender === '' || lender === 'Owned') return '#1AB4D7';
+  return '#1C2B4A';
+}
+
+function makePin(color, urgent) {
+  const size = urgent ? 34 : 28;
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:${size}px;height:${size}px;
+      background:${color};
+      border:3px solid white;
+      border-radius:50% 50% 50% 0;
+      transform:rotate(-45deg);
+      box-shadow:0 3px 12px rgba(0,0,0,0.2)${urgent?',0 0 0 4px rgba(239,68,68,0.2)':''};"
+    ></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size],
+    popupAnchor: [0, -(size+4)],
+  });
+}
+
+mapData.forEach(p => {
+  const color   = getColor(p.rent_status, p.mortgage_lender);
+  const urgent  = p.rent_status === 'Overdue';
+  const marker  = L.marker([p.lat, p.lng], { icon: makePin(color, urgent) });
+
+  const rent   = p.monthly_rent ? '£'+parseFloat(p.monthly_rent).toLocaleString('en-GB',{maximumFractionDigits:0})+'/mo' : 'Vacant';
+  const mtg    = p.mortgage_monthly && parseFloat(p.mortgage_monthly) > 0 ? '£'+parseFloat(p.mortgage_monthly).toLocaleString('en-GB',{maximumFractionDigits:0})+'/mo' : 'Owned';
+  const net    = (parseFloat(p.monthly_rent)||0) - (parseFloat(p.mortgage_monthly)||0);
+  const netStr = net >= 0
+    ? `<span style="color:#22C55E;font-weight:700;">+£${net.toLocaleString('en-GB',{maximumFractionDigits:0})}</span>`
+    : `<span style="color:#EF4444;font-weight:700;">-£${Math.abs(net).toLocaleString('en-GB',{maximumFractionDigits:0})}</span>`;
+
+  const sc = { Paid:'#22C55E', Due:'#F59E0B', Overdue:'#EF4444', Vacant:'#6B7280' };
+
+  marker.bindPopup(`
+    <div style="font-family:system-ui,sans-serif;min-width:230px;padding:4px 2px;">
+      <div style="font-weight:700;font-size:0.9rem;color:#111;margin-bottom:10px;line-height:1.3;">${p.property}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div style="background:#F9FAFB;border-radius:6px;padding:7px 9px;">
+          <div style="font-size:0.62rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Rent</div>
+          <div style="font-weight:700;font-size:0.88rem;color:#111;">${rent}</div>
+        </div>
+        <div style="background:#F9FAFB;border-radius:6px;padding:7px 9px;">
+          <div style="font-size:0.62rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Mortgage</div>
+          <div style="font-weight:600;font-size:0.88rem;color:#111;">${mtg}</div>
+        </div>
+        <div style="background:#F9FAFB;border-radius:6px;padding:7px 9px;">
+          <div style="font-size:0.62rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Net/mo</div>
+          <div style="font-size:0.88rem;">${netStr}</div>
+        </div>
+        <div style="background:#F9FAFB;border-radius:6px;padding:7px 9px;">
+          <div style="font-size:0.62rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Lender</div>
+          <div style="font-weight:500;font-size:0.82rem;color:#374151;">${p.mortgage_lender||'Owned'}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="background:${sc[p.rent_status]||'#6B7280'}20;color:${sc[p.rent_status]||'#6B7280'};font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:20px;">${p.rent_status}</span>
+        <a href="/property/${encodeURIComponent(p.address)}" style="color:#1AB4D7;font-size:0.8rem;font-weight:600;text-decoration:none;">Full details →</a>
+      </div>
+      ${urgent ? '<div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:6px;padding:6px 10px;margin-top:8px;font-size:0.78rem;color:#DC2626;font-weight:500;">⚠ Squatters — rent overdue. Legal action needed.</div>' : ''}
+    </div>
+  `, { maxWidth: 270 });
+
+  marker.addTo(map);
+});
+
+if (mapData.length > 0) {
+  const bounds = L.latLngBounds(mapData.map(p => [p.lat, p.lng]));
+  map.fitBounds(bounds, { padding: [80, 80] });
+}
 </script>
 {% endblock %}
