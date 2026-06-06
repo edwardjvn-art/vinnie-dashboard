@@ -181,6 +181,8 @@
           <a href="{{ url_for('mortgages') }}"   class="{{ 'active' if page == 'mortgages' else '' }}">Mortgages</a>
           <a href="{{ url_for('deposits') }}"    class="{{ 'active' if page == 'deposits' else '' }}">Deposits (TDS)</a>
           <a href="{{ url_for('performance') }}" class="{{ 'active' if page == 'performance' else '' }}">Performance</a>
+          <div class="nav-dropdown-divider"></div>
+          <a href="{{ url_for('problem_occupants') }}" class="{{ 'active' if page == 'problem_occupants' else '' }}" style="color:#F87171 !important;">🚨 Problem Occupants</a>
         </div>
       </li>
 

@@ -57,6 +57,25 @@ def load_invoices():
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%d %b")
     return df.to_dict("records")
 
+def load_problem_occupants():
+    try:
+        df = pd.read_csv(f"{DATA}/problem_occupants.csv")
+        df = df.where(pd.notnull(df), None)
+        records = df.to_dict("records")
+        from datetime import date
+        today = date.today()
+        for r in records:
+            if r.get("date_reported"):
+                try:
+                    reported = date.fromisoformat(str(r["date_reported"]))
+                    r["days_since"] = (today - reported).days
+                except: r["days_since"] = None
+        return records
+    except: return []
+
+def save_problem_occupants(records):
+    pd.DataFrame(records).to_csv(f"{DATA}/problem_occupants.csv", index=False)
+
 def load_deposits():
     try:
         df = pd.read_csv(f"{DATA}/deposits.csv")
@@ -167,6 +186,64 @@ def overview():
     outstanding   = [i for i in invoices if i["status"]=="Outstanding"]
     out_total     = sum(float(i["amount_gbp"]) for i in outstanding)
     pending_tasks = [t for t in tasks if not t["done"]]
+
+    # Net worth
+    property_values = {
+        "5 Queensway Mildenhall": 550000,
+        "5 Beeches Road West Row": 495000,
+        "22 Fleming Avenue Mildenhall": 275000,
+        "1 Bernards Close Mildenhall": 650000,
+        "3 Bernards Close Mildenhall": 650000,
+        "4 Bernards Close Mildenhall": 650000,
+        "1A Vinrose Lodge Mildenhall": 160000,
+        "5a Beeches Road West Row": 230000,
+        "5b Beeches Road West Row": 230000,
+        "Ponderosa West Row": 495000,
+        "Ponderosa Annex West Row": 0,
+        "St Michaels Thetford": 175000,
+        "Garrod House Flat 1 Lakenheath": 125000,
+        "Garrod House Flat 2 Lakenheath": 125000,
+        "Garrod House Flat 3 Lakenheath": 125000,
+        "Garrod House Flat B Lakenheath": 125000,
+        "Sparks Farm Hurdle Drove": 900000,
+        "Cottage Lakenheath": 175000,
+        "Airview House West Row": 625000,
+        "Airview Annex West Row": 0,
+        "The Shed West Row": 275000,
+    }
+    total_property_value = sum(property_values.values())
+    net_worth = total_property_value - total_mtg_bal if "total_mtg_bal" in dir() else total_property_value - 2019000
+
+    # Rent collection this month
+    paid_count    = len([p for p in props if p.get("rent_status") == "Paid"])
+    overdue_count = len([p for p in props if p.get("rent_status") == "Overdue"])
+    overdue_amount= sum(float(p.get("monthly_rent",0) or 0) for p in props if p.get("rent_status") == "Overdue")
+
+    # Mortgage expiry alerts
+    from datetime import date, datetime
+    today = date.today()
+    mortgage_alerts = []
+    for p in props:
+        me = p.get("mortgage_end")
+        if me and str(me) not in ["","nan","None","SPT"]:
+            try:
+                end_date = datetime.strptime(str(me)[:10], "%Y-%m-%d").date()
+                days_left = (end_date - today).days
+                if days_left < 180:
+                    mortgage_alerts.append({
+                        "property": p["property"],
+                        "end_date": str(me)[:10],
+                        "days_left": days_left,
+                        "lender": p.get("mortgage_lender",""),
+                        "urgent": days_left < 60
+                    })
+            except: pass
+    mortgage_alerts.sort(key=lambda x: x["days_left"])
+
+    # Problem occupants summary
+    problem_occ = load_problem_occupants()
+    problem_count = len(problem_occ)
+    problem_loss  = sum(float(o.get("estimated_loss_per_month",0) or 0) for o in problem_occ)
     alerts        = build_alerts(props, lorries, invoices)
 
     return render_template("overview.html",
@@ -177,6 +254,14 @@ def overview():
         total_vat=total_vat, out_total=out_total,
         pending_tasks=pending_tasks[:5], alerts=alerts,
         today=datetime.now().strftime("%A, %d %B %Y"),
+        net_worth=net_worth,
+        total_property_value=total_property_value,
+        paid_count=paid_count,
+        overdue_count=overdue_count,
+        overdue_amount=overdue_amount,
+        mortgage_alerts=mortgage_alerts,
+        problem_count=problem_count,
+        problem_loss=problem_loss,
         urgent_alerts=[a for a in alerts if a["level"]=="high"],
     )
 
@@ -508,6 +593,49 @@ def property_map():
     return render_template("map.html", page="map",
         props=props, map_data=map_data,
         total_rent=total_rent, alerts=alerts)
+
+@app.route("/problem-occupants", methods=["GET","POST"])
+@login_required
+def problem_occupants():
+    props = load_props()
+    alerts = build_alerts(props, load_lorries(), load_invoices())
+    occ_list = load_problem_occupants()
+    if request.method == "POST":
+        from datetime import date
+        today = date.today()
+        date_rep = request.form.get("date_reported","")
+        days = None
+        if date_rep:
+            try:
+                reported = date.fromisoformat(date_rep)
+                days = (today - reported).days
+            except: pass
+        loss = float(request.form.get("estimated_loss_per_month",0) or 0)
+        occ_list.append({
+            "property":    request.form.get("property",""),
+            "occupant_name": request.form.get("occupant_name",""),
+            "issue_type":  request.form.get("issue_type",""),
+            "date_reported": date_rep,
+            "days_since":  days,
+            "legal_stage": request.form.get("legal_stage",""),
+            "solicitor":   request.form.get("solicitor",""),
+            "next_action": request.form.get("next_action",""),
+            "next_action_date": request.form.get("next_action_date",""),
+            "estimated_loss_per_month": loss,
+            "notes":       request.form.get("notes",""),
+        })
+        save_problem_occupants(occ_list)
+        return redirect(url_for("problem_occupants"))
+    total_loss = sum(float(o["estimated_loss_per_month"]) for o in occ_list if o.get("estimated_loss_per_month"))
+    total_lost_to_date = sum(
+        float(o["estimated_loss_per_month"]) * (o["days_since"] or 0) / 30
+        for o in occ_list if o.get("estimated_loss_per_month") and o.get("days_since")
+    )
+    legal_count = len([o for o in occ_list if o.get("legal_stage") and o["legal_stage"] not in ["","None","None instructed",None]])
+    return render_template("problem_occupants.html", page="problem_occupants",
+        occupants=occ_list, total_loss=total_loss,
+        total_lost_to_date=total_lost_to_date,
+        legal_count=legal_count, all_props=props, alerts=alerts)
 
 @app.route("/deposits", methods=["GET","POST"])
 @login_required

@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Problem Occupants — VS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Problem Occupants</div>
+    <div class="page-sub">Squatters, rent arrears and evictions in progress</div>
+  </div>
+
+  {% if occupants %}
+  <div style="background:#FBEAEA;border:0.5px solid #F5C6C6;border-left:4px solid var(--red);border-radius:10px;padding:16px 20px;margin-bottom:1.25rem;">
+    <div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px;">⚠ {{ occupants|length }} active problem occupancy case{{ 's' if occupants|length > 1 else '' }}</div>
+    <div style="font-size:12px;color:var(--text-muted);">Estimated total monthly loss: <strong style="color:var(--red);">£{{ "{:,.0f}".format(total_loss) }}</strong> — legal action required on all cases</div>
+  </div>
+  {% endif %}
+
+  <div class="metrics metrics-4" style="margin-bottom:1.25rem;">
+    <div class="metric red">
+      <div class="metric-label">Active Cases</div>
+      <div class="metric-value">{{ occupants|length }}</div>
+      <div class="metric-sub">Properties affected</div>
+    </div>
+    <div class="metric red">
+      <div class="metric-label">Monthly Loss</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_loss) }}</div>
+      <div class="metric-sub">Unpaid rent</div>
+    </div>
+    <div class="metric orange">
+      <div class="metric-label">Total Lost</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_lost_to_date) }}</div>
+      <div class="metric-sub">Since reported</div>
+    </div>
+    <div class="metric accent">
+      <div class="metric-label">Legal Actions</div>
+      <div class="metric-value">{{ legal_count }}</div>
+      <div class="metric-sub">In progress</div>
+    </div>
+  </div>
+
+  {% for occ in occupants %}
+  <div class="card" style="margin-bottom:1.25rem;border-left:4px solid var(--red);">
+    <div class="card-header" style="background:#FEF9F9;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:1.2rem;">🚨</span>
+        <div>
+          <div style="font-weight:700;font-size:14px;color:var(--navy);">{{ occ.property }}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+            {% if occ.issue_type == 'Squatters' %}Unauthorised occupants
+            {% elif occ.issue_type == 'Rent Arrears' %}Rent arrears
+            {% elif occ.issue_type == 'Eviction' %}Eviction in progress
+            {% else %}{{ occ.issue_type }}{% endif %}
+            · Reported {{ occ.date_reported }}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        {% if occ.issue_type == 'Squatters' %}
+        <span class="pill pill-red">Squatters</span>
+        {% elif occ.issue_type == 'Rent Arrears' %}
+        <span class="pill pill-orange">Rent Arrears</span>
+        {% else %}
+        <span class="pill pill-red">{{ occ.issue_type }}</span>
+        {% endif %}
+        {% if occ.days_since %}
+        <span style="font-size:11px;font-weight:700;color:var(--red);">{{ occ.days_since }} days</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Case Details</div>
+          <div class="list-row">
+            <span style="color:var(--text-muted);font-size:12px;">Occupant</span>
+            <span style="font-weight:500;font-size:12px;">{{ occ.occupant_name or 'Unknown' }}</span>
+          </div>
+          <div class="list-row">
+            <span style="color:var(--text-muted);font-size:12px;">Date Reported</span>
+            <span style="font-size:12px;">{{ occ.date_reported or '—' }}</span>
+          </div>
+          <div class="list-row">
+            <span style="color:var(--text-muted);font-size:12px;">Monthly Loss</span>
+            <span style="font-weight:700;color:var(--red);font-size:12px;">£{{ "{:,.0f}".format(occ.estimated_loss_per_month|float if occ.estimated_loss_per_month else 0) }}/mo</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Legal Progress</div>
+          <div class="list-row">
+            <span style="color:var(--text-muted);font-size:12px;">Legal Stage</span>
+            <span style="font-weight:500;font-size:12px;">{{ occ.legal_stage or 'Not started' }}</span>
+          </div>
+          <div class="list-row">
+            <span style="color:var(--text-muted);font-size:12px;">Solicitor</span>
+            <span style="font-size:12px;">{{ occ.solicitor or '—' }}</span>
+          </div>
+          <div class="list-row">
+            <span style="color:var(--text-muted);font-size:12px;">Next Action</span>
+            <span style="font-size:12px;color:var(--amber);">{{ occ.next_action or '—' }}</span>
+          </div>
+          {% if occ.next_action_date %}
+          <div class="list-row">
+            <span style="color:var(--text-muted);font-size:12px;">Due Date</span>
+            <span style="font-size:12px;font-weight:600;color:var(--navy);">{{ occ.next_action_date }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% if occ.notes %}
+      <div style="background:var(--cream);border-radius:6px;padding:10px 14px;font-size:12px;color:var(--text-muted);">
+        📋 {{ occ.notes }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div style="background:white;border:0.5px solid var(--border);border-radius:10px;padding:3rem;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:0.75rem;">✅</div>
+    <div style="font-size:1rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem;">No problem occupancies</div>
+    <div style="font-size:0.85rem;color:var(--text-muted);">All properties are either occupied with paying tenants or vacant</div>
+  </div>
+  {% endfor %}
+
+  <!-- Add case form -->
+  <div class="card" style="margin-top:1.25rem;">
+    <div class="card-header"><span class="card-title">Log New Case</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('problem_occupants') }}">
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label>Property</label>
+            <select name="property">
+              {% for p in all_props %}
+              <option value="{{ p.property }}">{{ p.property }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Issue Type</label>
+            <select name="issue_type">
+              <option>Squatters</option>
+              <option>Rent Arrears</option>
+              <option>Eviction</option>
+              <option>Disputed Tenancy</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Occupant Name</label>
+            <input type="text" name="occupant_name" placeholder="If known">
+          </div>
+          <div class="form-group">
+            <label>Date Reported</label>
+            <input type="date" name="date_reported">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Legal Stage</label>
+            <select name="legal_stage">
+              <option value="">None instructed</option>
+              <option>Letter before action</option>
+              <option>Section 8 served</option>
+              <option>Section 21 served</option>
+              <option>Court proceedings issued</option>
+              <option>Possession order granted</option>
+              <option>Bailiffs instructed</option>
+              <option>Resolved</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Solicitor</label>
+            <input type="text" name="solicitor" placeholder="Solicitor name">
+          </div>
+          <div class="form-group">
+            <label>Next Action</label>
+            <input type="text" name="next_action" placeholder="e.g. Instruct solicitor">
+          </div>
+          <div class="form-group">
+            <label>Next Action Date</label>
+            <input type="date" name="next_action_date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Monthly Loss £</label>
+            <input type="number" name="estimated_loss_per_month" placeholder="0">
+          </div>
+          <div class="form-group" style="flex:3;">
+            <label>Notes</label>
+            <input type="text" name="notes" placeholder="Any additional details">
+          </div>
+        </div>
+        <button type="submit" class="btn">Log Case</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
