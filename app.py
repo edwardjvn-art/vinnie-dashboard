@@ -150,6 +150,8 @@ def overview():
     pending_tasks = [t for t in tasks if not t["done"]]
     alerts        = build_alerts(props, lorries, invoices)
 
+    import json
+    map_data_json = json.dumps([{k: (v if v is not None and str(v) != "nan" else "" if isinstance(v,str) else 0) for k,v in p.items()} for p in map_data])
     return render_template("overview.html",
         page="overview",
         props=props, accounts=accounts, cashflow=cashflow,
