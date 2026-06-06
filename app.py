@@ -31,6 +31,7 @@ def login_required(f):
 # ── Data loaders ──────────────────────────────────────────────────────────────
 def load_props():
     df = pd.read_csv(f"{DATA}/properties.csv")
+    df = df.where(pd.notnull(df), None)
     return df.to_dict("records")
 
 def load_accounts():
