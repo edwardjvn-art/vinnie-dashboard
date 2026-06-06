@@ -1,14 +1,22 @@
 {
-  "name": "Vinnie Dashboard",
-  "short_name": "Vinnie",
+  "name": "Vinnie Shipp",
+  "short_name": "VS",
   "description": "Business overview dashboard",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1AB4D7",
+  "background_color": "#F8F4EC",
+  "theme_color": "#1C2B4A",
   "orientation": "portrait-primary",
   "icons": [
-    { "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
