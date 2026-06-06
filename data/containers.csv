@@ -1,1 +1,6 @@
-container_id,location,size,type,status,monthly_income,tenant,notes
+container_id,size,type,status,hirer_name,hirer_phone,hire_start,hire_end,monthly_rate,notes
+C001,20ft,Standard,Vacant,,,,,100,
+C002,20ft,Standard,Vacant,,,,,100,
+C003,20ft,Standard,Vacant,,,,,100,
+C004,20ft,Standard,Vacant,,,,,100,
+C005,20ft,Standard,Vacant,,,,,100,

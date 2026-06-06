@@ -1,66 +1,68 @@
 {% extends "base.html" %}
-{% block title %}Containers — Vinnie Dashboard{% endblock %}
+{% block title %}VKS Containers — VS{% endblock %}
 {% block content %}
 <div class="page">
-  <div class="page-header">
-    <div class="page-title">Containers</div>
-    <div class="page-sub">Storage and shipping container portfolio</div>
+  <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <div class="page-title">VKS Containers</div>
+      <div class="page-sub">Hurdle Drove, Mildenhall · IP28 8RF · £{{ "{:,.0f}".format(rate) }}/container/month</div>
+    </div>
+    <a href="https://maps.app.goo.gl/aRs8ro7zwdeouV6m7" target="_blank" class="btn-outline" style="font-size:11px;">📍 View site →</a>
   </div>
 
-  <div class="metrics metrics-4">
+  <div class="metrics metrics-5" style="margin-bottom:1.25rem;">
     <div class="metric accent">
       <div class="metric-label">Total Containers</div>
       <div class="metric-value">{{ containers|length }}</div>
-      <div class="metric-sub">In portfolio</div>
+      <div class="metric-sub">On site</div>
     </div>
     <div class="metric green">
-      <div class="metric-label">Occupied</div>
-      <div class="metric-value">{{ containers|selectattr('status','equalto','Occupied')|list|length }}</div>
-      <div class="metric-sub">Currently rented</div>
+      <div class="metric-label">Hired Out</div>
+      <div class="metric-value">{{ hired_count }}</div>
+      <div class="metric-sub">£{{ "{:,.0f}".format(hired_income) }}/mo income</div>
     </div>
     <div class="metric orange">
       <div class="metric-label">Vacant</div>
-      <div class="metric-value">{{ containers|selectattr('status','equalto','Vacant')|list|length }}</div>
-      <div class="metric-sub">Available</div>
+      <div class="metric-value">{{ vacant_count }}</div>
+      <div class="metric-sub">£{{ "{:,.0f}".format(vacant_count * rate) }}/mo potential</div>
+    </div>
+    <div class="metric red">
+      <div class="metric-label">Vacancy Loss</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(vacant_count * rate) }}</div>
+      <div class="metric-sub">Per month unfilled</div>
     </div>
     <div class="metric">
-      <div class="metric-label">Monthly Income</div>
-      <div class="metric-value">£{{ "{:,.0f}".format(total_income) }}</div>
-      <div class="metric-sub">From containers</div>
+      <div class="metric-label">Occupancy Rate</div>
+      <div class="metric-value">{{ occupancy_pct }}%</div>
+      <div class="metric-sub">Of total capacity</div>
     </div>
   </div>
 
-  {% if containers %}
+  {% if hired %}
   <div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-header">
+      <span class="card-title">Hired Containers</span>
+      <span class="pill pill-green">{{ hired_count }} active</span>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Container ID</th>
-            <th>Location</th>
-            <th>Size</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Monthly Income</th>
-            <th>Tenant / User</th>
-            <th>Notes</th>
+            <th>ID</th><th>Size</th><th>Type</th><th>Hirer</th><th>Phone</th>
+            <th>Start</th><th>End</th><th>Rate/mo</th><th>Notes</th>
           </tr>
         </thead>
         <tbody>
-          {% for c in containers %}
+          {% for c in hired %}
           <tr>
             <td><strong>{{ c.container_id }}</strong></td>
-            <td>{{ c.location }}</td>
-            <td>{{ c.size }}</td>
-            <td>{{ c.type }}</td>
-            <td>
-              {% if c.status == 'Occupied' %}<span class="pill pill-green">Occupied</span>
-              {% elif c.status == 'Vacant' %}<span class="pill pill-orange">Vacant</span>
-              {% elif c.status == 'Maintenance' %}<span class="pill pill-red">Maintenance</span>
-              {% else %}<span class="pill pill-grey">{{ c.status }}</span>{% endif %}
-            </td>
-            <td class="td-bold">{% if c.monthly_income %}£{{ "{:,.0f}".format(c.monthly_income|float) }}{% else %}—{% endif %}</td>
-            <td class="td-muted">{{ c.tenant or '—' }}</td>
+            <td>{{ c.size or '—' }}</td>
+            <td>{{ c.type or '—' }}</td>
+            <td class="td-bold">{{ c.hirer_name or '—' }}</td>
+            <td class="td-muted">{{ c.hirer_phone or '—' }}</td>
+            <td class="td-muted">{{ c.hire_start or '—' }}</td>
+            <td class="td-muted">{{ c.hire_end or 'Rolling' }}</td>
+            <td class="td-bold" style="color:var(--green);">£{{ "{:,.0f}".format(c.monthly_rate|float if c.monthly_rate else rate) }}</td>
             <td class="td-muted">{{ c.notes or '—' }}</td>
           </tr>
           {% endfor %}
@@ -68,70 +70,93 @@
       </table>
     </div>
   </div>
-  {% else %}
-  <div style="background:white;border:1px solid #EAECF0;border-radius:12px;padding:3rem;text-align:center;margin-bottom:1.25rem;">
-    <div style="font-size:2rem;margin-bottom:0.75rem;">📦</div>
-    <div style="font-size:1rem;font-weight:600;color:#111827;margin-bottom:0.5rem;">No containers added yet</div>
-    <div style="font-size:0.85rem;color:#9CA3AF;">Use the form below to add containers once details are confirmed with Vinnie</div>
+  {% endif %}
+
+  {% if vacant %}
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-header">
+      <span class="card-title">Vacant Containers</span>
+      <span class="pill pill-orange">{{ vacant_count }} available to hire</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Size</th><th>Type</th><th>Rate/mo</th><th>Status</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          {% for c in vacant %}
+          <tr>
+            <td><strong>{{ c.container_id }}</strong></td>
+            <td>{{ c.size or '—' }}</td>
+            <td>{{ c.type or '—' }}</td>
+            <td class="td-bold">£{{ "{:,.0f}".format(c.monthly_rate|float if c.monthly_rate else rate) }}</td>
+            <td><span class="pill pill-orange">Available</span></td>
+            <td class="td-muted">{{ c.notes or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
   {% endif %}
 
   <div class="card">
-    <div class="card-header"><span class="card-title">Add Container</span></div>
+    <div class="card-header"><span class="card-title">Add / Update Container</span></div>
     <div class="card-body">
       <form method="POST" action="{{ url_for('containers') }}">
         <div class="form-row">
           <div class="form-group">
             <label>Container ID</label>
-            <input type="text" name="container_id" placeholder="e.g. C001">
-          </div>
-          <div class="form-group">
-            <label>Location</label>
-            <input type="text" name="location" placeholder="e.g. West Row Site">
+            <input type="text" name="container_id" placeholder="e.g. C006">
           </div>
           <div class="form-group">
             <label>Size</label>
-            <input type="text" name="size" placeholder="e.g. 20ft, 40ft">
+            <select name="size">
+              <option>20ft</option><option>40ft</option><option>10ft</option><option>Other</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Type</label>
             <select name="type">
-              <option value="">— Select —</option>
-              <option>Storage</option>
-              <option>Shipping</option>
-              <option>Refrigerated</option>
-              <option>Office</option>
-              <option>Workshop</option>
-              <option>Other</option>
+              <option>Standard</option><option>High Cube</option><option>Refrigerated</option><option>Other</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option>Vacant</option><option>Hired</option><option>Maintenance</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monthly Rate £</label>
+            <input type="number" name="monthly_rate" value="100" min="0">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Status</label>
-            <select name="status">
-              <option>Occupied</option>
-              <option>Vacant</option>
-              <option>Maintenance</option>
-            </select>
+            <label>Hirer Name</label>
+            <input type="text" name="hirer_name" placeholder="Leave blank if vacant">
           </div>
           <div class="form-group">
-            <label>Monthly Income £</label>
-            <input type="number" name="monthly_income" placeholder="0" min="0" step="50">
+            <label>Hirer Phone</label>
+            <input type="text" name="hirer_phone">
           </div>
           <div class="form-group">
-            <label>Tenant / User</label>
-            <input type="text" name="tenant" placeholder="Name or company">
+            <label>Hire Start</label>
+            <input type="date" name="hire_start">
+          </div>
+          <div class="form-group">
+            <label>Hire End</label>
+            <input type="date" name="hire_end">
           </div>
           <div class="form-group" style="flex:2;">
             <label>Notes</label>
-            <input type="text" name="notes" placeholder="Any additional notes">
+            <input type="text" name="notes">
           </div>
         </div>
-        <button type="submit" class="btn">Add Container</button>
+        <button type="submit" class="btn">Save Container</button>
       </form>
     </div>
   </div>
-
 </div>
 {% endblock %}

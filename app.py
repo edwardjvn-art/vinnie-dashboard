@@ -363,6 +363,9 @@ def lorries():
     alerts = build_alerts(props, lorry_list, invoices)
     return render_template("lorries.html", page="lorries",
         lorries=lorry_list, fuel=fuel, invoices=invoices[:6],
+        container_income=container_income, container_vacant_loss=container_vacant_loss,
+        lorry_income=lorry_income, fuel_costs=fuel_costs,
+        combined_monthly=combined_monthly, combined_net=combined_net, daily_income=daily_income,
         total_fuel=total_fuel, total_vat=total_vat, out_total=out_total,
         active=active, fuel_by_lorry=fuel_by_lorry, alerts=alerts)
 
@@ -478,24 +481,54 @@ def api_fuel_by_lorry():
 @login_required
 def containers():
     props = load_props()
-    container_list = load_containers()
     alerts = build_alerts(props, load_lorries(), load_invoices())
+    container_list = load_containers()
+    rate = 100
     if request.method == "POST":
-        container_list.append({
-            "container_id": request.form.get("container_id",""),
-            "location":     request.form.get("location",""),
-            "size":         request.form.get("size",""),
-            "type":         request.form.get("type",""),
-            "status":       request.form.get("status","Vacant"),
-            "monthly_income": request.form.get("monthly_income",0),
-            "tenant":       request.form.get("tenant",""),
-            "notes":        request.form.get("notes",""),
-        })
+        # Check if container_id exists — update if so
+        cid = request.form.get("container_id","")
+        found = False
+        for c in container_list:
+            if c.get("container_id") == cid:
+                c["size"]         = request.form.get("size","")
+                c["type"]         = request.form.get("type","")
+                c["status"]       = request.form.get("status","Vacant")
+                c["monthly_rate"] = request.form.get("monthly_rate", rate)
+                c["hirer_name"]   = request.form.get("hirer_name","")
+                c["hirer_phone"]  = request.form.get("hirer_phone","")
+                c["hire_start"]   = request.form.get("hire_start","")
+                c["hire_end"]     = request.form.get("hire_end","")
+                c["notes"]        = request.form.get("notes","")
+                found = True
+                break
+        if not found:
+            container_list.append({
+                "container_id": cid,
+                "size":         request.form.get("size","20ft"),
+                "type":         request.form.get("type","Standard"),
+                "status":       request.form.get("status","Vacant"),
+                "monthly_rate": request.form.get("monthly_rate", rate),
+                "hirer_name":   request.form.get("hirer_name",""),
+                "hirer_phone":  request.form.get("hirer_phone",""),
+                "hire_start":   request.form.get("hire_start",""),
+                "hire_end":     request.form.get("hire_end",""),
+                "notes":        request.form.get("notes",""),
+            })
         save_containers(container_list)
         return redirect(url_for("containers"))
-    total_income = sum(float(c["monthly_income"]) for c in container_list if c.get("monthly_income"))
+
+    hired   = [c for c in container_list if str(c.get("status","")).lower() == "hired"]
+    vacant  = [c for c in container_list if str(c.get("status","")).lower() != "hired"]
+    hired_income  = sum(float(c.get("monthly_rate",rate) or rate) for c in hired)
+    vacant_count  = len(vacant)
+    hired_count   = len(hired)
+    occupancy_pct = round(hired_count / len(container_list) * 100) if container_list else 0
+
     return render_template("containers.html", page="containers",
-        containers=container_list, total_income=total_income, alerts=alerts)
+        containers=container_list, hired=hired, vacant=vacant,
+        hired_count=hired_count, vacant_count=vacant_count,
+        hired_income=hired_income, occupancy_pct=occupancy_pct,
+        rate=rate, alerts=alerts)
 
 @app.route("/performance")
 @login_required
