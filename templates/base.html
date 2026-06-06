@@ -7,6 +7,152 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
   {% block extra_head %}{% endblock %}
+  <style>
+    /* Dropdown nav */
+    .nav-links { list-style:none; display:flex; align-items:center; gap:2px; }
+
+    .nav-item { position:relative; }
+
+    .nav-item > a, .nav-dropdown-toggle {
+      color: rgba(248,244,236,0.55);
+      font-size: 11px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .nav-item > a:hover,
+    .nav-dropdown-toggle:hover {
+      color: var(--cream);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .nav-item > a.active,
+    .nav-item.active > .nav-dropdown-toggle {
+      color: var(--cream);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .nav-dropdown-toggle .arrow {
+      font-size: 8px;
+      opacity: 0.5;
+      transition: transform 0.2s;
+    }
+
+    .nav-item.open .arrow { transform: rotate(180deg); }
+
+    .nav-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      background: #1A2840;
+      border: 0.5px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      min-width: 180px;
+      padding: 4px;
+      z-index: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .nav-item.open .nav-dropdown { display: block; }
+
+    .nav-dropdown a {
+      display: block;
+      color: rgba(248,244,236,0.7) !important;
+      font-size: 12px !important;
+      letter-spacing: 0.04em !important;
+      padding: 8px 12px !important;
+      border-radius: 5px;
+      transition: all 0.12s;
+      text-transform: none !important;
+    }
+
+    .nav-dropdown a:hover {
+      color: var(--cream) !important;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--gold) !important;
+      background: rgba(201,168,76,0.1);
+    }
+
+    .nav-dropdown-divider {
+      height: 0.5px;
+      background: rgba(255,255,255,0.08);
+      margin: 4px 8px;
+    }
+
+    /* Hamburger for mobile */
+    .nav-hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--cream);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    /* Mobile menu */
+    .nav-mobile {
+      display: none;
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--navy);
+      z-index: 400;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .nav-mobile.open { display: block; }
+
+    .nav-mobile-section {
+      margin-bottom: 20px;
+    }
+
+    .nav-mobile-label {
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(248,244,236,0.3);
+      padding: 4px 8px;
+      margin-bottom: 4px;
+    }
+
+    .nav-mobile a {
+      display: block;
+      color: rgba(248,244,236,0.7);
+      font-size: 14px;
+      padding: 11px 12px;
+      border-radius: 6px;
+      transition: all 0.12s;
+    }
+
+    .nav-mobile a:hover, .nav-mobile a.active {
+      color: var(--cream);
+      background: rgba(255,255,255,0.08);
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: block; }
+    }
+  </style>
 </head>
 <body>
 <div class="layout">
@@ -20,34 +166,125 @@
     </div>
 
     <ul class="nav-links">
-      {% set links = [
-        ('overview',     'Overview'),
-        ('properties',   'Properties'),
-        ('mortgages',    'Mortgages'),
-        ('finance',      'Finance'),
-        ('lorries',      'Lorries'),
-        ('tasks',        'Tasks'),
-        ('alerts_page',  'Alerts'),
-        ('containers',   'Containers'),
-        ('performance',  'Performance'),
-        ('maintenance',  'Maintenance'),
-        ('property_map', 'Map'),
-      ] %}
-      {% for endpoint, label in links %}
-      <li><a href="{{ url_for(endpoint) }}" class="{{ 'active' if page == endpoint else '' }}">{{ label }}</a></li>
-      {% endfor %}
+      <!-- Overview -->
+      <li class="nav-item">
+        <a href="{{ url_for('overview') }}" class="{{ 'active' if page == 'overview' else '' }}">Overview</a>
+      </li>
+
+      <!-- Properties dropdown -->
+      <li class="nav-item {{ 'active' if page in ['properties','mortgages','deposits','performance'] else '' }}" id="drop-properties">
+        <button class="nav-dropdown-toggle" onclick="toggleDrop('drop-properties')">
+          Properties <span class="arrow">▼</span>
+        </button>
+        <div class="nav-dropdown">
+          <a href="{{ url_for('properties') }}"  class="{{ 'active' if page == 'properties' else '' }}">All Properties</a>
+          <a href="{{ url_for('mortgages') }}"   class="{{ 'active' if page == 'mortgages' else '' }}">Mortgages</a>
+          <a href="{{ url_for('deposits') }}"    class="{{ 'active' if page == 'deposits' else '' }}">Deposits (TDS)</a>
+          <a href="{{ url_for('performance') }}" class="{{ 'active' if page == 'performance' else '' }}">Performance</a>
+        </div>
+      </li>
+
+      <!-- Finance dropdown -->
+      <li class="nav-item {{ 'active' if page in ['finance','vat_invoices','containers'] else '' }}" id="drop-finance">
+        <button class="nav-dropdown-toggle" onclick="toggleDrop('drop-finance')">
+          Finance <span class="arrow">▼</span>
+        </button>
+        <div class="nav-dropdown">
+          <a href="{{ url_for('finance') }}"      class="{{ 'active' if page == 'finance' else '' }}">Cash Flow</a>
+          <a href="{{ url_for('vat_invoices') }}" class="{{ 'active' if page == 'vat_invoices' else '' }}">Invoices & VAT</a>
+          <a href="{{ url_for('containers') }}"   class="{{ 'active' if page == 'containers' else '' }}">Containers</a>
+        </div>
+      </li>
+
+      <!-- Operations dropdown -->
+      <li class="nav-item {{ 'active' if page in ['lorries','maintenance','tasks'] else '' }}" id="drop-ops">
+        <button class="nav-dropdown-toggle" onclick="toggleDrop('drop-ops')">
+          Operations <span class="arrow">▼</span>
+        </button>
+        <div class="nav-dropdown">
+          <a href="{{ url_for('lorries') }}"     class="{{ 'active' if page == 'lorries' else '' }}">Lorries</a>
+          <a href="{{ url_for('maintenance') }}" class="{{ 'active' if page == 'maintenance' else '' }}">Maintenance</a>
+          <a href="{{ url_for('tasks') }}"       class="{{ 'active' if page == 'tasks' else '' }}">Tasks</a>
+        </div>
+      </li>
+
+      <!-- Alerts -->
+      <li class="nav-item">
+        <a href="{{ url_for('alerts_page') }}" class="{{ 'active' if page == 'alerts_page' else '' }}">Alerts</a>
+      </li>
+
+      <!-- Map -->
+      <li class="nav-item">
+        <a href="{{ url_for('property_map') }}" class="{{ 'active' if page == 'property_map' else '' }}">Map</a>
+      </li>
     </ul>
 
-    <button onclick="document.querySelector('.nav-links').classList.toggle('open')" style="display:none;background:none;border:none;color:#F8F4EC;font-size:22px;cursor:pointer;padding:4px 8px;" class="nav-hamburger">&#9776;</button><div class="nav-user">
-      <span class="nav-user-name">Vinnie</span>
-      <a href="{{ url_for('logout') }}" class="nav-signout">Sign out</a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="nav-hamburger" onclick="toggleMobile()">&#9776;</button>
+      <div class="nav-user">
+        <span class="nav-user-name">Vinnie</span>
+        <a href="{{ url_for('logout') }}" class="nav-signout">Sign out</a>
+      </div>
     </div>
   </nav>
+
+  <!-- Mobile menu -->
+  <div class="nav-mobile" id="mobileNav">
+    <div class="nav-mobile-section">
+      <div class="nav-mobile-label">Main</div>
+      <a href="{{ url_for('overview') }}" class="{{ 'active' if page == 'overview' else '' }}" onclick="closeMobile()">Overview</a>
+      <a href="{{ url_for('alerts_page') }}" class="{{ 'active' if page == 'alerts_page' else '' }}" onclick="closeMobile()">Alerts</a>
+      <a href="{{ url_for('property_map') }}" class="{{ 'active' if page == 'property_map' else '' }}" onclick="closeMobile()">Map</a>
+    </div>
+    <div class="nav-mobile-section">
+      <div class="nav-mobile-label">Properties</div>
+      <a href="{{ url_for('properties') }}" onclick="closeMobile()">All Properties</a>
+      <a href="{{ url_for('mortgages') }}" onclick="closeMobile()">Mortgages</a>
+      <a href="{{ url_for('deposits') }}" onclick="closeMobile()">Deposits (TDS)</a>
+      <a href="{{ url_for('performance') }}" onclick="closeMobile()">Performance</a>
+    </div>
+    <div class="nav-mobile-section">
+      <div class="nav-mobile-label">Finance</div>
+      <a href="{{ url_for('finance') }}" onclick="closeMobile()">Cash Flow</a>
+      <a href="{{ url_for('vat_invoices') }}" onclick="closeMobile()">Invoices & VAT</a>
+      <a href="{{ url_for('containers') }}" onclick="closeMobile()">Containers</a>
+    </div>
+    <div class="nav-mobile-section">
+      <div class="nav-mobile-label">Operations</div>
+      <a href="{{ url_for('lorries') }}" onclick="closeMobile()">Lorries</a>
+      <a href="{{ url_for('maintenance') }}" onclick="closeMobile()">Maintenance</a>
+      <a href="{{ url_for('tasks') }}" onclick="closeMobile()">Tasks</a>
+    </div>
+  </div>
 
   <div class="pw">
     {% block content %}{% endblock %}
   </div>
 </div>
+
+<script>
+function toggleDrop(id) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (el.id !== id) el.classList.remove('open');
+  });
+  document.getElementById(id).classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.nav-item')) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('open'));
+  }
+});
+
+function toggleMobile() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+
+function closeMobile() {
+  document.getElementById('mobileNav').classList.remove('open');
+}
+</script>
+
 {% block scripts %}{% endblock %}
 </body>
 </html>
