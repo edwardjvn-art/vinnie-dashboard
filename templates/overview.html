@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Overview — Vinnie Dashboard{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+{% endblock %}
 {% block content %}
 <style>
   .pw { padding: 0 !important; }
@@ -289,7 +292,7 @@
   </div>
 </div>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 {% endblock %}
 
