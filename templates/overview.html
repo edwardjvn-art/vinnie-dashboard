@@ -2,6 +2,10 @@
 {% block title %}Overview — Vinnie Dashboard{% endblock %}
 
 {% block extra_head %}
+<style>
+.pw { padding: 0; overflow: hidden; }
+footer { display: none; }
+</style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 {% endblock %}
 {% block content %}
@@ -196,7 +200,7 @@
 </style>
 
 <div class="page-wrap">
-  <div id="map"></div>
+  <div id="map" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:1;width:100%;height:100%;"></div>
 
   <!-- Greeting -->
   <div class="overlay greeting-float">
