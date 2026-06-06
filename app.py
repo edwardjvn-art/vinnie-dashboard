@@ -438,6 +438,57 @@ def performance():
         ranked=ranked, total_net=total_net, negative_count=negative_count,
         best=best, worst=worst, alerts=alerts)
 
+@app.route("/map")
+@login_required
+def property_map():
+    props = load_props()
+    alerts = build_alerts(props, load_lorries(), load_invoices())
+    occupied = [p for p in props if p["rent_status"] != "Vacant"]
+    total_rent = sum(float(p["monthly_rent"]) for p in occupied if str(p.get("monthly_rent","")) not in ["","nan"])
+
+    # Property coordinates — Suffolk locations
+    coords = {
+        "5 Queensway Mildenhall":         (52.3441, 0.5089),
+        "5 Beeches Road West Row":         (52.3612, 0.5234),
+        "22 Fleming Avenue Mildenhall":    (52.3428, 0.5071),
+        "1 Bernards Close Mildenhall":     (52.3398, 0.5102),
+        "3 Bernards Close Mildenhall":     (52.3399, 0.5103),
+        "4 Bernards Close Mildenhall":     (52.3400, 0.5104),
+        "1A Vinrose Lodge Mildenhall":     (52.3442, 0.5090),
+        "5a Beeches Road West Row":        (52.3613, 0.5235),
+        "5b Beeches Road West Row":        (52.3614, 0.5236),
+        "Ponderosa West Row":              (52.3580, 0.5190),
+        "Ponderosa Annex West Row":        (52.3581, 0.5191),
+        "St Michaels Thetford":            (52.4142, 0.7432),
+        "Garrod House Flat 1 Lakenheath":  (52.4089, 0.5321),
+        "Garrod House Flat 2 Lakenheath":  (52.4090, 0.5322),
+        "Garrod House Flat 3 Lakenheath":  (52.4091, 0.5323),
+        "Garrod House Flat B Lakenheath":  (52.4092, 0.5324),
+        "Sparks Farm Hurdle Drove":        (52.3901, 0.4980),
+        "Cottage Lakenheath":              (52.4085, 0.5318),
+        "Airview House West Row":          (52.3615, 0.5237),
+        "Airview Annex West Row":          (52.3616, 0.5238),
+        "The Shed West Row":               (52.3618, 0.5240),
+    }
+
+    map_data = []
+    for p in props:
+        lat, lng = coords.get(p["property"], (52.38, 0.54))
+        map_data.append({
+            "property":        p["property"],
+            "address":         p["address"],
+            "lat":             lat,
+            "lng":             lng,
+            "monthly_rent":    p.get("monthly_rent", 0),
+            "mortgage_monthly":p.get("mortgage_monthly", 0),
+            "mortgage_lender": p.get("mortgage_lender", ""),
+            "rent_status":     p.get("rent_status", ""),
+        })
+
+    return render_template("map.html", page="map",
+        props=props, map_data=map_data,
+        total_rent=total_rent, alerts=alerts)
+
 @app.context_processor
 def inject_now():
     return {"now": datetime.now().strftime("%H:%M")}
