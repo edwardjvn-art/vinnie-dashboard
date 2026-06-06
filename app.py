@@ -488,7 +488,16 @@ def property_map():
 
     return render_template("map.html", page="map",
         props=props, map_data=map_data,
-        map_data_json=[{k:("" if v is None else 0 if v!=v else v) for k,v in p.items()} for p in map_data],
+        map_data_json=__import__('json').dumps([{
+            'property': str(p.get('property','') or ''),
+            'address': str(p.get('address','') or ''),
+            'lat': float(p.get('lat') or 52.38),
+            'lng': float(p.get('lng') or 0.54),
+            'monthly_rent': float(p.get('monthly_rent') or 0),
+            'mortgage_monthly': float(p.get('mortgage_monthly') or 0),
+            'mortgage_lender': str(p.get('mortgage_lender','') or ''),
+            'rent_status': str(p.get('rent_status','') or ''),
+        } for p in map_data]),
         total_rent=total_rent, alerts=alerts)
 
 @app.context_processor
