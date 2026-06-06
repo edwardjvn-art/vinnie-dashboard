@@ -150,8 +150,6 @@ def overview():
     pending_tasks = [t for t in tasks if not t["done"]]
     alerts        = build_alerts(props, lorries, invoices)
 
-    import json
-    map_data_json = json.dumps([{k: (v if v is not None and str(v) != "nan" else "" if isinstance(v,str) else 0) for k,v in p.items()} for p in map_data])
     return render_template("overview.html",
         page="overview",
         props=props, accounts=accounts, cashflow=cashflow,
@@ -490,6 +488,7 @@ def property_map():
 
     return render_template("map.html", page="map",
         props=props, map_data=map_data,
+        map_data_json=[{k:("" if v is None else 0 if v!=v else v) for k,v in p.items()} for p in map_data],
         total_rent=total_rent, alerts=alerts)
 
 @app.context_processor
