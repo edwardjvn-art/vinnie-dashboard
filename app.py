@@ -31,7 +31,6 @@ def login_required(f):
 # ── Data loaders ──────────────────────────────────────────────────────────────
 def load_props():
     df = pd.read_csv(f"{DATA}/properties.csv")
-    df = df.where(pd.notnull(df), None)
     return df.to_dict("records")
 
 def load_accounts():
@@ -57,6 +56,26 @@ def load_invoices():
     df = pd.read_csv(f"{DATA}/invoices.csv")
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%d %b")
     return df.to_dict("records")
+
+def load_deposits():
+    try:
+        df = pd.read_csv(f"{DATA}/deposits.csv")
+        df = df.where(pd.notnull(df), None)
+        return df.to_dict("records")
+    except: return []
+
+def save_deposits(records):
+    pd.DataFrame(records).to_csv(f"{DATA}/deposits.csv", index=False)
+
+def load_vat_invoices():
+    try:
+        df = pd.read_csv(f"{DATA}/vat_invoices.csv")
+        df = df.where(pd.notnull(df), None)
+        return df.to_dict("records")
+    except: return []
+
+def save_vat_invoices(records):
+    pd.DataFrame(records).to_csv(f"{DATA}/vat_invoices.csv", index=False)
 
 def load_containers():
     try:
@@ -488,17 +507,66 @@ def property_map():
 
     return render_template("map.html", page="map",
         props=props, map_data=map_data,
-        map_data_json=__import__('json').dumps([{
-            'property': str(p.get('property','') or ''),
-            'address': str(p.get('address','') or ''),
-            'lat': float(p.get('lat') or 52.38),
-            'lng': float(p.get('lng') or 0.54),
-            'monthly_rent': float(p.get('monthly_rent') or 0),
-            'mortgage_monthly': float(p.get('mortgage_monthly') or 0),
-            'mortgage_lender': str(p.get('mortgage_lender','') or ''),
-            'rent_status': str(p.get('rent_status','') or ''),
-        } for p in map_data]),
         total_rent=total_rent, alerts=alerts)
+
+@app.route("/deposits", methods=["GET","POST"])
+@login_required
+def deposits():
+    props = load_props()
+    alerts = build_alerts(props, load_lorries(), load_invoices())
+    dep_list = load_deposits()
+    if request.method == "POST":
+        prop = request.form.get("property","")
+        for d in dep_list:
+            if d["property"] == prop:
+                d["tenant_name"]    = request.form.get("tenant_name","")
+                d["deposit_amount"] = request.form.get("deposit_amount","")
+                d["scheme"]         = request.form.get("scheme","")
+                d["certificate_ref"]= request.form.get("certificate_ref","")
+                d["date_protected"] = request.form.get("date_protected","")
+                d["scheme_url"]     = request.form.get("scheme_url","")
+                break
+        save_deposits(dep_list)
+        return redirect(url_for("deposits"))
+    total_deposits  = sum(float(d["deposit_amount"]) for d in dep_list if d.get("deposit_amount") and str(d["deposit_amount"]) not in ["","None","nan"])
+    protected_count = len([d for d in dep_list if d.get("scheme") and str(d["scheme"]) not in ["","None","nan"]])
+    unprotected_count = len([d for d in dep_list if d.get("deposit_amount") and str(d["deposit_amount"]) not in ["","None","nan"] and (not d.get("scheme") or str(d["scheme"]) in ["","None","nan"])])
+    empty_count     = len([d for d in dep_list if not d.get("deposit_amount") or str(d["deposit_amount"]) in ["","None","nan"]])
+    return render_template("deposits.html", page="deposits",
+        deposits=dep_list, total_deposits=total_deposits,
+        protected_count=protected_count, unprotected_count=unprotected_count,
+        empty_count=empty_count, alerts=alerts)
+
+@app.route("/vat-invoices", methods=["GET","POST"])
+@login_required
+def vat_invoices():
+    props = load_props()
+    alerts = build_alerts(props, load_lorries(), load_invoices())
+    inv_list = load_vat_invoices()
+    if request.method == "POST":
+        amt = float(request.form.get("amount_gbp",0) or 0)
+        vat = float(request.form.get("vat_gbp",0) or 0)
+        inv_list.append({
+            "invoice_id":  request.form.get("invoice_id",""),
+            "date":        request.form.get("date",""),
+            "category":    request.form.get("category",""),
+            "supplier":    request.form.get("supplier",""),
+            "description": request.form.get("description",""),
+            "amount_gbp":  amt,
+            "vat_gbp":     vat,
+            "total_gbp":   amt + vat,
+            "status":      request.form.get("status","Outstanding"),
+            "drive_link":  request.form.get("drive_link",""),
+            "notes":       request.form.get("notes",""),
+        })
+        save_vat_invoices(inv_list)
+        return redirect(url_for("vat_invoices"))
+    outstanding_total = sum(float(i["total_gbp"]) for i in inv_list if i.get("status")=="Outstanding" and i.get("total_gbp"))
+    outstanding_count = len([i for i in inv_list if i.get("status")=="Outstanding"])
+    vat_total = sum(float(i["vat_gbp"]) for i in inv_list if i.get("vat_gbp"))
+    return render_template("vat_invoices.html", page="vat_invoices",
+        invoices=inv_list, outstanding_total=outstanding_total,
+        outstanding_count=outstanding_count, vat_total=vat_total, alerts=alerts)
 
 @app.context_processor
 def inject_now():

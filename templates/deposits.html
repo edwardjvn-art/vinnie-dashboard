@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Deposits — VS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Tenant Deposits</div>
+    <div class="page-sub">All deposits must be protected in a government-approved scheme within 30 days</div>
+  </div>
+
+  <div class="metrics metrics-4" style="margin-bottom:1.25rem;">
+    <div class="metric accent">
+      <div class="metric-label">Total Deposits Held</div>
+      <div class="metric-value">£{{ "{:,.0f}".format(total_deposits) }}</div>
+      <div class="metric-sub">Across all properties</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Protected</div>
+      <div class="metric-value">{{ protected_count }}</div>
+      <div class="metric-sub">Deposits registered</div>
+    </div>
+    <div class="metric red">
+      <div class="metric-label">Unprotected</div>
+      <div class="metric-value">{{ unprotected_count }}</div>
+      <div class="metric-sub">Action required</div>
+    </div>
+    <div class="metric orange">
+      <div class="metric-label">Not Yet Added</div>
+      <div class="metric-value">{{ empty_count }}</div>
+      <div class="metric-sub">Fill in details</div>
+    </div>
+  </div>
+
+  {% if unprotected_count > 0 %}
+  <div class="alert-urgent" style="margin-bottom:1.25rem;">
+    <div class="alert-title">⚠ {{ unprotected_count }} deposit(s) not protected</div>
+    <div class="alert-sub">Tenants can claim 1-3x the deposit amount if not protected in a scheme within 30 days of receipt. Register immediately at tds.co.uk, depositprotection.com or mydeposits.co.uk</div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Deposit Register</span>
+      <div style="display:flex;gap:8px;">
+        <a href="https://www.tds.co.uk" target="_blank" class="btn-outline" style="font-size:11px;padding:5px 12px;">TDS ↗</a>
+        <a href="https://www.depositprotection.com" target="_blank" class="btn-outline" style="font-size:11px;padding:5px 12px;">DPS ↗</a>
+        <a href="https://www.mydeposits.co.uk" target="_blank" class="btn-outline" style="font-size:11px;padding:5px 12px;">MyDeposits ↗</a>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Tenant</th>
+            <th>Deposit Amount</th>
+            <th>Scheme</th>
+            <th>Certificate Ref</th>
+            <th>Date Protected</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in deposits %}
+          <tr>
+            <td><strong>{{ d.property }}</strong></td>
+            <td class="td-muted">{{ d.tenant_name or '—' }}</td>
+            <td class="td-bold">{% if d.deposit_amount %}£{{ "{:,.0f}".format(d.deposit_amount|float) }}{% else %}—{% endif %}</td>
+            <td>
+              {% if d.scheme and d.scheme != 'nan' and d.scheme %}
+                <span class="pill pill-blue">{{ d.scheme }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td class="td-muted" style="font-family:monospace;font-size:12px;">{{ d.certificate_ref or '—' }}</td>
+            <td class="td-muted">{{ d.date_protected or '—' }}</td>
+            <td>
+              {% if d.scheme and d.scheme != 'nan' and d.scheme %}
+                <span class="pill pill-green">Protected</span>
+              {% elif d.deposit_amount and d.deposit_amount != 'nan' %}
+                <span class="pill pill-red">Not protected</span>
+              {% else %}
+                <span class="pill pill-grey">Not set</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if d.scheme_url and d.scheme_url != 'nan' %}
+              <a href="{{ d.scheme_url }}" target="_blank" style="color:#1C2B4A;font-size:0.8rem;font-weight:500;">View cert →</a>
+              {% else %}
+              <a href="https://www.tds.co.uk" target="_blank" style="color:var(--amber);font-size:0.8rem;font-weight:500;">Register →</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add/update deposit -->
+  <div class="card" style="margin-top:1.25rem;">
+    <div class="card-header"><span class="card-title">Add / Update Deposit</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('deposits') }}">
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label>Property</label>
+            <select name="property">
+              {% for d in deposits %}
+              <option value="{{ d.property }}">{{ d.property }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tenant Name</label>
+            <input type="text" name="tenant_name" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Deposit Amount £</label>
+            <input type="number" name="deposit_amount" placeholder="0" step="50">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Scheme</label>
+            <select name="scheme">
+              <option value="">— Not yet registered —</option>
+              <option>TDS</option>
+              <option>DPS</option>
+              <option>MyDeposits</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Certificate Reference</label>
+            <input type="text" name="certificate_ref" placeholder="e.g. TDS-12345678">
+          </div>
+          <div class="form-group">
+            <label>Date Protected</label>
+            <input type="date" name="date_protected">
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label>Certificate URL (from scheme website)</label>
+            <input type="text" name="scheme_url" placeholder="Paste link to certificate">
+          </div>
+        </div>
+        <button type="submit" class="btn">Save Deposit</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

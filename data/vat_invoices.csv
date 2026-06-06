@@ -1,0 +1,5 @@
+invoice_id,date,category,supplier,description,amount_gbp,vat_gbp,total_gbp,status,drive_link,notes
+INV6409223,2026-06-02,Fuel,Tate Fleet,Diesel - Bunkered & Esso,2794.39,558.88,3353.27,Outstanding,,
+KM137260,2026-04-23,Maintenance,K&M Tyres,Tyre services,595.00,119.00,714.00,Paid,,
+KM137529,2026-05-06,Maintenance,K&M Tyres,Tyre services,525.00,105.00,630.00,Paid,,
+KM137650,2026-05-11,Maintenance,K&M Tyres,Tyre services,422.85,84.57,507.42,Outstanding,,

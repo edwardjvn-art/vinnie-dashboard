@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}Invoices & VAT — VS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Invoices & VAT</div>
+    <div class="page-sub">Select invoices and send directly to your accountant</div>
+  </div>
+
+  <div class="metrics metrics-4" style="margin-bottom:1.25rem;">
+    <div class="metric accent">
+      <div class="metric-label">Total Invoices</div>
+      <div class="metric-value">{{ invoices|length }}</div>
+      <div class="metric-sub">In system</div>
+    </div>
+    <div class="metric red">
+      <div class="metric-label">Outstanding</div>
+      <div class="metric-value">£{{ "{:,.2f}".format(outstanding_total) }}</div>
+      <div class="metric-sub">{{ outstanding_count }} unpaid</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">VAT Reclaimable</div>
+      <div class="metric-value">£{{ "{:,.2f}".format(vat_total) }}</div>
+      <div class="metric-sub">From all invoices</div>
+    </div>
+    <div class="metric orange">
+      <div class="metric-label">Selected</div>
+      <div class="metric-value" id="selectedCount">0</div>
+      <div class="metric-sub">Ready to send</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">All Invoices & Receipts</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" id="selectAll" onchange="toggleAll(this)"> Select all
+        </label>
+        <button class="btn" onclick="sendToAccountant()" id="sendBtn" disabled style="opacity:0.4;">
+          ✉ Send to Accountant
+        </button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px;"></th>
+            <th>Invoice ID</th>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Supplier</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>VAT</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Document</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in invoices %}
+          <tr>
+            <td>
+              <input type="checkbox" class="inv-check"
+                data-id="{{ inv.invoice_id }}"
+                data-supplier="{{ inv.supplier }}"
+                data-desc="{{ inv.description }}"
+                data-amount="{{ inv.amount_gbp }}"
+                data-vat="{{ inv.vat_gbp }}"
+                data-total="{{ inv.total_gbp }}"
+                data-date="{{ inv.date }}"
+                data-category="{{ inv.category }}"
+                data-link="{{ inv.drive_link or '' }}"
+                onchange="updateSelected()">
+            </td>
+            <td><strong>{{ inv.invoice_id }}</strong></td>
+            <td class="td-muted">{{ inv.date }}</td>
+            <td>
+              {% if inv.category == 'Fuel' %}<span class="pill pill-blue">Fuel</span>
+              {% elif inv.category == 'Maintenance' %}<span class="pill pill-orange">Maintenance</span>
+              {% else %}<span class="pill pill-grey">{{ inv.category }}</span>{% endif %}
+            </td>
+            <td>{{ inv.supplier }}</td>
+            <td class="td-muted">{{ inv.description }}</td>
+            <td class="td-bold">£{{ "{:,.2f}".format(inv.amount_gbp|float) }}</td>
+            <td style="color:var(--green);">£{{ "{:,.2f}".format(inv.vat_gbp|float) }}</td>
+            <td class="td-bold">£{{ "{:,.2f}".format(inv.total_gbp|float) }}</td>
+            <td>
+              {% if inv.status == 'Paid' %}<span class="pill pill-green">Paid</span>
+              {% else %}<span class="pill pill-red">Outstanding</span>{% endif %}
+            </td>
+            <td>
+              {% if inv.drive_link and inv.drive_link != 'nan' and inv.drive_link %}
+              <a href="{{ inv.drive_link }}" target="_blank" style="color:#1C2B4A;font-size:0.8rem;font-weight:500;">View →</a>
+              {% else %}
+              <span style="color:var(--text-muted);font-size:0.8rem;">No link</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add invoice form -->
+  <div class="card" style="margin-top:1.25rem;">
+    <div class="card-header"><span class="card-title">Add Invoice / Receipt</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('vat_invoices') }}">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Invoice ID</label>
+            <input type="text" name="invoice_id" placeholder="e.g. INV-001">
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" name="date">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select name="category">
+              <option>Fuel</option>
+              <option>Maintenance</option>
+              <option>Property Expense</option>
+              <option>Insurance</option>
+              <option>Professional Fees</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Supplier</label>
+            <input type="text" name="supplier" placeholder="e.g. Tate Fleet">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label>Description</label>
+            <input type="text" name="description" placeholder="Brief description">
+          </div>
+          <div class="form-group">
+            <label>Amount £ (ex VAT)</label>
+            <input type="number" name="amount_gbp" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>VAT £</label>
+            <input type="number" name="vat_gbp" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option>Outstanding</option>
+              <option>Paid</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:3;">
+            <label>Google Drive Link</label>
+            <input type="text" name="drive_link" placeholder="Paste Google Drive link to document">
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <input type="text" name="notes" placeholder="Optional notes">
+          </div>
+        </div>
+        <button type="submit" class="btn">Add Invoice</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function updateSelected() {
+  const checked = document.querySelectorAll('.inv-check:checked');
+  document.getElementById('selectedCount').textContent = checked.length;
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = checked.length === 0;
+  btn.style.opacity = checked.length === 0 ? '0.4' : '1';
+}
+
+function toggleAll(cb) {
+  document.querySelectorAll('.inv-check').forEach(c => { c.checked = cb.checked; });
+  updateSelected();
+}
+
+function sendToAccountant() {
+  const checked = document.querySelectorAll('.inv-check:checked');
+  if (checked.length === 0) return;
+
+  let totalAmt = 0, totalVat = 0;
+  const lines = [];
+  const categories = {};
+
+  checked.forEach(c => {
+    const amt = parseFloat(c.dataset.amount) || 0;
+    const vat = parseFloat(c.dataset.vat) || 0;
+    totalAmt += amt;
+    totalVat += vat;
+    const cat = c.dataset.category || 'Other';
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(c);
+  });
+
+  let body = 'Dear Accountant,\n\nPlease find below the selected invoices and VAT receipts for D E Shipp Farming & Haulage.\n\n';
+
+  Object.keys(categories).forEach(cat => {
+    body += cat.toUpperCase() + '\n';
+    body += '—'.repeat(40) + '\n';
+    categories[cat].forEach(c => {
+      body += '• ' + c.dataset.supplier + ' — ' + c.dataset.desc + '\n';
+      body += '  Invoice: ' + c.dataset.id + '  |  Date: ' + c.dataset.date + '\n';
+      body += '  Amount: £' + parseFloat(c.dataset.amount).toFixed(2);
+      body += '  |  VAT: £' + parseFloat(c.dataset.vat).toFixed(2);
+      body += '  |  Total: £' + parseFloat(c.dataset.total).toFixed(2) + '\n';
+      if (c.dataset.link) {
+        body += '  Document: ' + c.dataset.link + '\n';
+      }
+      body += '\n';
+    });
+  });
+
+  body += '—'.repeat(40) + '\n';
+  body += 'TOTAL (ex VAT):  £' + totalAmt.toFixed(2) + '\n';
+  body += 'TOTAL VAT:       £' + totalVat.toFixed(2) + '\n';
+  body += 'TOTAL (inc VAT): £' + (totalAmt + totalVat).toFixed(2) + '\n';
+  body += '\nKind regards,\nVinnie Shipp\nD E Shipp Farming & Haulage';
+
+  const subject = 'VAT Receipts & Invoices — D E Shipp Farming & Haulage';
+  const mailto = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  window.location.href = mailto;
+}
+</script>
+{% endblock %}
