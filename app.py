@@ -150,15 +150,6 @@ def overview():
     pending_tasks = [t for t in tasks if not t["done"]]
     alerts        = build_alerts(props, lorries, invoices)
 
-    import json as _json
-    class _SafeEncoder(_json.JSONEncoder):
-        def default(self, obj):
-            try:
-                import math
-                if math.isnan(obj) or math.isinf(obj): return 0
-            except: pass
-            return str(obj)
-    map_data = _json.loads(_json.dumps(map_data, cls=_SafeEncoder))
     return render_template("overview.html",
         page="overview",
         props=props, accounts=accounts, cashflow=cashflow,
