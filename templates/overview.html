@@ -295,7 +295,7 @@
 
 {% block scripts %}
 <script>
-const mapData = {{ map_data | tojson }};
+const mapData = {{ map_data | tojson | safe }};
 
 const map = L.map('map', {
   center: [52.39, 0.56],
