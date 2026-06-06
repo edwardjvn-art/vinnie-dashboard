@@ -1,151 +1,392 @@
 {% extends "base.html" %}
 {% block title %}Overview — Vinnie Dashboard{% endblock %}
-{% block content %}
-<div class="page">
 
-  <div class="page-header">
-    <div class="page-title">Good morning, James 👋</div>
-    <div class="page-sub">{{ today }}</div>
+{% block content %}
+<style>
+  .pw { padding: 0 !important; }
+  .page-wrap {
+    position: relative;
+    height: calc(100vh - 56px);
+    overflow: hidden;
+  }
+  #map {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1;
+  }
+  .overlay {
+    position: absolute;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .overlay * { pointer-events: auto; }
+
+  /* Metric cards — top left */
+  .metrics-float {
+    top: 16px; left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mf-card {
+    background: white;
+    border-radius: 10px;
+    padding: 10px 14px;
+    min-width: 150px;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .mf-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 3px;
+  }
+  .mf-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .mf-sub { font-size: 9px; margin-top: 3px; }
+  .mf-green { color: #22C55E; }
+  .mf-teal  { color: #1AB4D7; }
+  .mf-red   { color: #EF4444; }
+  .mf-grey  { color: #9CA3AF; }
+
+  /* Alerts — top right */
+  .alerts-float {
+    top: 16px; right: 16px;
+    width: 210px;
+  }
+  .alert-card {
+    background: white;
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    margin-bottom: 8px;
+  }
+  .alert-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 6px;
+  }
+  .alert-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 5px 0;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 11px;
+    color: #111827;
+  }
+  .alert-row:last-child { border-bottom: none; }
+  .alert-row-sub { font-size: 10px; color: #9CA3AF; }
+
+  /* Tasks strip — bottom */
+  .tasks-float {
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    max-width: 700px;
+  }
+  .tasks-card {
+    background: white;
+    border-radius: 12px;
+    padding: 10px 16px;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tasks-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+  .task-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #F9FAFB;
+    border: 1px solid #F3F4F6;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 11px;
+    color: #374151;
+    white-space: nowrap;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .task-dot-high   { width:6px;height:6px;border-radius:50%;background:#EF4444;flex-shrink:0; }
+  .task-dot-medium { width:6px;height:6px;border-radius:50%;background:#F59E0B;flex-shrink:0; }
+  .task-dot-low    { width:6px;height:6px;border-radius:50%;background:#D1D5DB;flex-shrink:0; }
+
+  /* Greeting strip — top centre */
+  .greeting-float {
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+  }
+  .greeting-pill {
+    background: white;
+    border-radius: 20px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    white-space: nowrap;
+  }
+  .greeting-pill span { color: #1AB4D7; }
+
+  /* Legend — bottom left */
+  .legend-float {
+    bottom: 16px;
+    left: 16px;
+  }
+  .legend-card {
+    background: white;
+    border-radius: 8px;
+    padding: 7px 12px;
+    display: flex;
+    gap: 12px;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    align-items: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: #374151;
+    white-space: nowrap;
+  }
+  .legend-dot { width:9px;height:9px;border-radius:50%; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .metrics-float { display: none; }
+    .tasks-float { width: 90%; bottom: 10px; }
+    .alerts-float { width: 160px; }
+    .greeting-float { display: none; }
+  }
+</style>
+
+<div class="page-wrap">
+  <div id="map"></div>
+
+  <!-- Greeting -->
+  <div class="overlay greeting-float">
+    <div class="greeting-pill">Good morning, <span>James</span> 👋 &nbsp;·&nbsp; {{ today }}</div>
   </div>
 
-  {% if urgent_alerts %}
-  <div class="card" style="margin-bottom:1.5rem;">
-    <div class="card-header">
-      <span class="card-title" style="color:#DC2626;">Urgent — needs attention</span>
+  <!-- Metric cards -->
+  <div class="overlay metrics-float">
+    <div class="mf-card">
+      <div class="mf-label">Properties</div>
+      <div class="mf-value">{{ occupied|length }}/{{ props|length }}</div>
+      <div class="mf-sub mf-teal">£{{ "{:,.0f}".format(total_rent) }}/mo income</div>
     </div>
-    <div class="card-body" style="padding-top:0.75rem;padding-bottom:0.75rem;">
-      {% for a in urgent_alerts %}
-      <div class="alert-item alert-high">
-        <span class="alert-icon">{{ a.icon }}</span>
+    <div class="mf-card">
+      <div class="mf-label">Net Cash Flow</div>
+      <div class="mf-value">£{{ "{:,.0f}".format(net_cf) }}</div>
+      <div class="mf-sub mf-green">↑ After all mortgages</div>
+    </div>
+    <div class="mf-card">
+      <div class="mf-label">Mortgages</div>
+      <div class="mf-value">£{{ "{:,.0f}".format(total_mtg) }}</div>
+      <div class="mf-sub mf-grey">Per month combined</div>
+    </div>
+    <div class="mf-card">
+      <div class="mf-label">Net Worth</div>
+      <div class="mf-value">~£5.2M</div>
+      <div class="mf-sub mf-teal">Property equity</div>
+    </div>
+    {% if total_fuel > 0 %}
+    <div class="mf-card">
+      <div class="mf-label">Fuel This Month</div>
+      <div class="mf-value">£{{ "{:,.0f}".format(total_fuel) }}</div>
+      <div class="mf-sub mf-green">VAT: £{{ "{:,.0f}".format(total_vat) }} reclaimable</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Alerts top right -->
+  <div class="overlay alerts-float">
+    {% if urgent_alerts %}
+    <div class="alert-card" style="border-color:rgba(239,68,68,0.25);">
+      <div class="alert-section-title mf-red">Urgent</div>
+      {% for a in urgent_alerts[:3] %}
+      <div class="alert-row">
+        <span>{{ a.icon }}</span>
         <div>
-          <div class="alert-title">{{ a.title }}</div>
-          <div class="alert-sub">{{ a.sub }}</div>
+          <div>{{ a.title }}</div>
+          <div class="alert-row-sub">{{ a.sub }}</div>
         </div>
       </div>
       {% endfor %}
     </div>
-  </div>
-  {% endif %}
-
-  <div class="metrics metrics-5">
-    <div class="metric accent">
-      <div class="metric-label">Properties</div>
-      <div class="metric-value">{{ occupied|length }}/{{ props|length }}</div>
-      <div class="metric-sub">{{ props|length - occupied|length }} vacant</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Monthly Rent</div>
-      <div class="metric-value">£{{ "{:,.0f}".format(total_rent) }}</div>
-      <div class="metric-sub">This month</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Mortgages</div>
-      <div class="metric-value">£{{ "{:,.0f}".format(total_mtg) }}</div>
-      <div class="metric-sub">Per month</div>
-    </div>
-    <div class="metric green">
-      <div class="metric-label">Net Cash Flow</div>
-      <div class="metric-value">£{{ "{:,.0f}".format(net_cf) }}</div>
-      <div class="metric-up">↑ After all mortgages</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Alerts</div>
-      <div class="metric-value">{{ alerts|length }}</div>
-      <div class="metric-sub">{{ urgent_alerts|length }} urgent</div>
+    {% endif %}
+    <div class="alert-card">
+      <div class="alert-section-title mf-grey">Today</div>
+      {% for t in pending_tasks[:3] %}
+      <div class="alert-row">
+        <div class="task-dot-{{ t.get('priority','low') }}"></div>
+        <div style="font-size:11px;color:#374151;">{{ t.task[:35] }}{% if t.task|length > 35 %}…{% endif %}</div>
+      </div>
+      {% endfor %}
+      {% if not pending_tasks %}
+      <div style="font-size:11px;color:#9CA3AF;padding:4px 0;">All done ✓</div>
+      {% endif %}
     </div>
   </div>
 
-  <div class="grid-60-40" style="margin-bottom:1.25rem;">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Cash Flow — Last 6 Months</span></div>
-      <div class="card-body"><div class="chart-wrap"><canvas id="cfChart"></canvas></div></div>
-    </div>
-    <div class="stack">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Rent Status</span></div>
-        <div class="card-body">
-          {% for p in props %}
-          {% set rent = p.monthly_rent if p.monthly_rent and p.monthly_rent == p.monthly_rent else 0 %}
-          <div class="list-row">
-            <div>
-              <div class="list-row-title">{{ p.address.split(',')[0] }}</div>
-              <div class="list-row-sub">£{{ "{:,.0f}".format(rent|float) }}/mo</div>
-            </div>
-            <div class="list-row-right">
-              {% if p.rent_status == 'Paid' %}<span class="pill pill-green">Paid</span>
-              {% elif p.rent_status == 'Due' %}<span class="pill pill-orange">Due</span>
-              {% elif p.rent_status == 'Overdue' %}<span class="pill pill-red">Overdue</span>
-              {% else %}<span class="pill pill-grey">Vacant</span>{% endif %}
-            </div>
-          </div>
-          {% endfor %}
-        </div>
+  <!-- Tasks bottom strip -->
+  <div class="overlay tasks-float">
+    <div class="tasks-card">
+      <div class="tasks-label">Tasks ({{ pending_tasks|length }})</div>
+      {% for t in pending_tasks[:6] %}
+      <div class="task-chip">
+        <div class="task-dot-{{ t.get('priority','low') }}"></div>
+        {{ t.task[:30] }}{% if t.task|length > 30 %}…{% endif %}
       </div>
+      {% endfor %}
+      {% if pending_tasks|length > 6 %}
+      <div class="task-chip" style="color:#1AB4D7;border-color:#BAE6F5;">+{{ pending_tasks|length - 6 }} more</div>
+      {% endif %}
     </div>
   </div>
 
-  <div class="grid-60-40">
-    <div class="metrics metrics-3">
-      <div class="metric">
-        <div class="metric-label">Fuel This Month</div>
-        <div class="metric-value">£{{ "{:,.0f}".format(total_fuel) }}</div>
-        <div class="metric-sub">All lorries</div>
-      </div>
-      <div class="metric green">
-        <div class="metric-label">VAT Reclaimable</div>
-        <div class="metric-value">£{{ "{:,.0f}".format(total_vat) }}</div>
-        <div class="metric-sub">On fuel</div>
-      </div>
-      <div class="metric {% if out_total > 0 %}orange{% endif %}">
-        <div class="metric-label">Outstanding Invoices</div>
-        <div class="metric-value">£{{ "{:,.0f}".format(out_total) }}</div>
-        <div class="metric-sub">Lorries</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Tasks Today</span>
-        <span class="pill pill-teal">{{ pending_tasks|length }} remaining</span>
-      </div>
-      <div class="card-body">
-        {% if pending_tasks %}
-        {% for t in pending_tasks %}
-        <div class="task-item">
-          <div class="task-dot dot-{{ t.get('priority','low') }}"></div>
-          <span class="task-text">{{ t.task }}</span>
-          <span class="task-by">{{ t.get('added_by','') }}</span>
-        </div>
-        {% endfor %}
-        {% else %}
-        <div class="empty" style="padding:1rem 0;">All tasks completed ✓</div>
-        {% endif %}
-      </div>
+  <!-- Legend bottom left -->
+  <div class="overlay legend-float">
+    <div class="legend-card">
+      <div class="legend-item"><div class="legend-dot" style="background:#22C55E;"></div>Paid</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#F59E0B;"></div>Due</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#EF4444;"></div>Overdue</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1AB4D7;"></div>Owned</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6B7280;"></div>Vacant</div>
     </div>
   </div>
-
 </div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 {% endblock %}
+
 {% block scripts %}
 <script>
-const cf = {{ cashflow | tojson }};
-new Chart(document.getElementById('cfChart'), {
-  type: 'bar',
-  data: {
-    labels: cf.map(d => d.month),
-    datasets: [
-      { label: 'Income', data: cf.map(d => d.income), backgroundColor: 'rgba(26,180,215,0.8)', borderRadius: 4 },
-      { label: 'Expenses', data: cf.map(d => d.expenses), backgroundColor: 'rgba(229,231,235,0.9)', borderRadius: 4 },
-      { label: 'Net', data: cf.map(d => d.net), type: 'line', borderColor: '#10B981', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#10B981', tension: 0.3 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
-    scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-      y: { grid: { color: '#F3F4F6' }, ticks: { callback: v => '£'+v.toLocaleString(), font: { size: 11 } } }
-    }
-  }
+const mapData = {{ map_data | tojson }};
+
+const map = L.map('map', {
+  center: [52.39, 0.56],
+  zoom: 11,
+  zoomControl: false,
+  scrollWheelZoom: true,
 });
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CartoDB',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+function getColor(status, lender) {
+  if (status === 'Overdue') return '#EF4444';
+  if (status === 'Due')     return '#F59E0B';
+  if (status === 'Vacant')  return '#6B7280';
+  if (lender === 'None' || lender === '' || lender === 'Owned') return '#1AB4D7';
+  return '#22C55E';
+}
+
+function makePin(color, urgent) {
+  const size = urgent ? 34 : 28;
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:${size}px;height:${size}px;
+      background:${color};
+      border:3px solid white;
+      border-radius:50% 50% 50% 0;
+      transform:rotate(-45deg);
+      box-shadow:0 3px 12px rgba(0,0,0,0.2)${urgent?',0 0 0 4px rgba(239,68,68,0.2)':''};"
+    ></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size],
+    popupAnchor: [0, -(size+4)],
+  });
+}
+
+mapData.forEach(p => {
+  const color   = getColor(p.rent_status, p.mortgage_lender);
+  const urgent  = p.rent_status === 'Overdue';
+  const marker  = L.marker([p.lat, p.lng], { icon: makePin(color, urgent) });
+
+  const rent   = p.monthly_rent ? '£'+parseFloat(p.monthly_rent).toLocaleString('en-GB',{maximumFractionDigits:0})+'/mo' : 'Vacant';
+  const mtg    = p.mortgage_monthly && parseFloat(p.mortgage_monthly) > 0 ? '£'+parseFloat(p.mortgage_monthly).toLocaleString('en-GB',{maximumFractionDigits:0})+'/mo' : 'Owned';
+  const net    = (parseFloat(p.monthly_rent)||0) - (parseFloat(p.mortgage_monthly)||0);
+  const netStr = net >= 0
+    ? `<span style="color:#22C55E;font-weight:700;">+£${net.toLocaleString('en-GB',{maximumFractionDigits:0})}</span>`
+    : `<span style="color:#EF4444;font-weight:700;">-£${Math.abs(net).toLocaleString('en-GB',{maximumFractionDigits:0})}</span>`;
+
+  const sc = { Paid:'#22C55E', Due:'#F59E0B', Overdue:'#EF4444', Vacant:'#6B7280' };
+
+  marker.bindPopup(`
+    <div style="font-family:system-ui,sans-serif;min-width:230px;padding:4px 2px;">
+      <div style="font-weight:700;font-size:0.9rem;color:#111;margin-bottom:10px;line-height:1.3;">${p.property}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div style="background:#F9FAFB;border-radius:6px;padding:7px 9px;">
+          <div style="font-size:0.62rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Rent</div>
+          <div style="font-weight:700;font-size:0.88rem;color:#111;">${rent}</div>
+        </div>
+        <div style="background:#F9FAFB;border-radius:6px;padding:7px 9px;">
+          <div style="font-size:0.62rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Mortgage</div>
+          <div style="font-weight:600;font-size:0.88rem;color:#111;">${mtg}</div>
+        </div>
+        <div style="background:#F9FAFB;border-radius:6px;padding:7px 9px;">
+          <div style="font-size:0.62rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Net/mo</div>
+          <div style="font-size:0.88rem;">${netStr}</div>
+        </div>
+        <div style="background:#F9FAFB;border-radius:6px;padding:7px 9px;">
+          <div style="font-size:0.62rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Lender</div>
+          <div style="font-weight:500;font-size:0.82rem;color:#374151;">${p.mortgage_lender||'Owned'}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="background:${sc[p.rent_status]||'#6B7280'}20;color:${sc[p.rent_status]||'#6B7280'};font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:20px;">${p.rent_status}</span>
+        <a href="/property/${encodeURIComponent(p.address)}" style="color:#1AB4D7;font-size:0.8rem;font-weight:600;text-decoration:none;">Full details →</a>
+      </div>
+      ${urgent ? '<div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:6px;padding:6px 10px;margin-top:8px;font-size:0.78rem;color:#DC2626;font-weight:500;">⚠ Squatters — rent overdue. Legal action needed.</div>' : ''}
+    </div>
+  `, { maxWidth: 270 });
+
+  marker.addTo(map);
+});
+
+if (mapData.length > 0) {
+  const bounds = L.latLngBounds(mapData.map(p => [p.lat, p.lng]));
+  map.fitBounds(bounds, { padding: [80, 80] });
+}
 </script>
 {% endblock %}
