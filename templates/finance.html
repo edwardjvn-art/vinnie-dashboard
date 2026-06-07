@@ -130,7 +130,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-const cf = {{ cashflow | tojson }};
+const cf = [{"month":"Jan 2026","income":26100,"expenses":8024.66,"net":18075.34},{"month":"Feb 2026","income":26100,"expenses":8024.66,"net":18075.34},{"month":"Mar 2026","income":26100,"expenses":8024.66,"net":18075.34},{"month":"Apr 2026","income":26100,"expenses":8024.66,"net":18075.34},{"month":"May 2026","income":26100,"expenses":8024.66,"net":18075.34},{"month":"Jun 2026","income":24500,"expenses":8024.66,"net":16475.34}];
 new Chart(document.getElementById('cfChart'), {
   type: 'bar',
   data: {
