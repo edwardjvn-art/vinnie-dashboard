@@ -137,9 +137,9 @@ new Chart(document.getElementById('cfChart'), {
   data: {
     labels: cf.map(d => d.month),
     datasets: [
-      { label: 'Income', data: cf.map(d => d.income), backgroundColor: 'rgba(26,180,215,0.8)', borderRadius: 4 },
-      { label: 'Expenses', data: cf.map(d => d.expenses), backgroundColor: 'rgba(229,231,235,0.9)', borderRadius: 4 },
-      { label: 'Net', data: cf.map(d => d.net), type: 'line', borderColor: '#10B981', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#10B981', tension: 0.3 }
+      { label: 'Income', data: cf.map(d => d.income), backgroundColor: '#1C2B4A', borderRadius: 4 },
+      { label: 'Expenses', data: cf.map(d => d.expenses), backgroundColor: '#E8E0CC', borderRadius: 4 },
+      { label: 'Net', data: cf.map(d => d.net), type: 'line', borderColor: '#C9A84C', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#C9A84C', tension: 0.3 }
     ]
   },
   options: {
@@ -158,7 +158,7 @@ new Chart(document.getElementById('rentChart'), {
   type: 'bar',
   data: {
     labels: rentData.map(p => p.address.split(',')[0]),
-    datasets: [{ data: rentData.map(p => parseFloat(p.monthly_rent)), backgroundColor: 'rgba(26,180,215,0.75)', borderRadius: 4, label: 'Rent' }]
+    datasets: [{ data: rentData.map(p => parseFloat(p.monthly_rent)), backgroundColor: '#1C2B4A', borderRadius: 4, label: 'Rent' }]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
