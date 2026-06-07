@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% block title %}VKS Containers — VS{% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 var hired = {{ hired_count }};
@@ -24,7 +23,6 @@ new Chart(document.getElementById('incomeChart'), {
   options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: v => '£'+v } } } }
 });
 </script>
-{% endblock %}
 {% block content %}
 <div class="page">
   <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">

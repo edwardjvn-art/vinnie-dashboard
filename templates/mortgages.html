@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% block title %}Mortgages — Vinnie Dashboard{% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 var lenderData = {
@@ -30,7 +29,6 @@ new Chart(document.getElementById("paymentChart"), {
   options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => "£"+v } } } }
 });
 </script>
-{% endblock %}
 {% block content %}
 <div class="page">
   <div class="page-header"><div class="page-title">Mortgages</div></div>
