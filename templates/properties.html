@@ -26,19 +26,36 @@
   </div>
 
   {% for p in props %}
-  {% set rent = p.monthly_rent if p.monthly_rent and p.monthly_rent == p.monthly_rent else 0 %}
-  {% set beds = (p.bedrooms|int|string + '-bed') if p.bedrooms and p.bedrooms == p.bedrooms and p.bedrooms|int > 0 else 'Studio' %}
-  <a href="{{ url_for('property_detail', address=p.address) }}" class="item-card">
-    <div>
-      <div class="item-card-title">{{ p.address }}</div>
-      <div class="item-card-sub">{{ beds }} · £{{ "{:,.0f}".format(rent|float) }}/mo · {{ p.mortgage_lender }}</div>
-    </div>
-    <div class="item-card-right">
-      {% if p.rent_status == 'Paid' %}<span class="pill pill-green">Paid</span>
-      {% elif p.rent_status == 'Due' %}<span class="pill pill-orange">Due</span>
-      {% elif p.rent_status == 'Overdue' %}<span class="pill pill-red">Overdue</span>
-      {% else %}<span class="pill pill-grey">Vacant</span>{% endif %}
-      <span class="open-arrow">Open →</span>
+  {% set rent = p.monthly_rent|float if p.monthly_rent and p.monthly_rent|string not in ['nan','None',''] else 0 %}
+  {% set mtg = p.mortgage_monthly|float if p.mortgage_monthly and p.mortgage_monthly|string not in ['nan','None',''] else 0 %}
+  {% set net = rent - mtg %}
+  {% set beds = (p.bedrooms|int|string + '-bed') if p.bedrooms and p.bedrooms|string not in ['nan','None',''] and p.bedrooms|int > 0 else '' %}
+  {% set border_color = '#C0392B' if p.rent_status == 'Overdue' else ('#1A7A4A' if p.rent_status == 'Paid' else ('#C17F24' if p.rent_status == 'Due' else '#8A9BB0')) %}
+  <a href="{{ url_for('property_detail', address=p.address) }}" style="display:block;text-decoration:none;margin-bottom:8px;">
+    <div style="background:{{ '#FEF9F9' if p.rent_status == 'Overdue' else 'var(--color-background-primary)' }};border:0.5px solid {{ '#F5C6C6' if p.rent_status == 'Overdue' else 'var(--color-border-tertiary)' }};border-left:3px solid {{ border_color }};border-radius:var(--border-radius-md);padding:12px 16px;display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 1fr;align-items:center;gap:12px;">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">{{ p.property }}</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">{{ beds }}{% if beds and p.mortgage_lender and p.mortgage_lender|string not in ['nan','None',''] %} · {% endif %}{% if p.mortgage_lender and p.mortgage_lender|string not in ['nan','None',''] %}{{ p.mortgage_lender }}{% else %}Owned outright{% endif %}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Rent</div>
+        <div style="font-size:13px;font-weight:500;">{% if rent %}£{{ "{:,.0f}".format(rent) }}{% else %}—{% endif %}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Mortgage</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);">{% if mtg %}£{{ "{:,.0f}".format(mtg) }}{% else %}Owned{% endif %}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Net/mo</div>
+        <div style="font-size:13px;font-weight:500;color:{{ '#1A7A4A' if net > 0 else '#C0392B' }};">{% if net >= 0 %}+{% endif %}£{{ "{:,.0f}".format(net) }}</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        {% if p.rent_status == 'Paid' %}<span style="font-size:11px;background:#EAF5EE;color:#1A7A4A;padding:3px 10px;border-radius:20px;">Paid</span>
+        {% elif p.rent_status == 'Due' %}<span style="font-size:11px;background:#FDF3E4;color:#C17F24;padding:3px 10px;border-radius:20px;">Due</span>
+        {% elif p.rent_status == 'Overdue' %}<span style="font-size:11px;background:#FBEAEA;color:#C0392B;padding:3px 10px;border-radius:20px;">Overdue</span>
+        {% else %}<span style="font-size:11px;background:var(--color-background-secondary);color:var(--color-text-secondary);padding:3px 10px;border-radius:20px;">Vacant</span>{% endif %}
+        <span style="font-size:12px;color:var(--color-text-secondary);">→</span>
+      </div>
     </div>
   </a>
   {% endfor %}
