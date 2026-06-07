@@ -363,8 +363,6 @@ def lorries():
     alerts = build_alerts(props, lorry_list, invoices)
     return render_template("lorries.html", page="lorries",
         lorries=lorry_list, fuel=fuel, invoices=invoices[:6],
-        lorry_income=lorry_income, fuel_costs=fuel_costs,
-        combined_monthly=combined_monthly, combined_net=combined_net, daily_income=daily_income,
         total_fuel=total_fuel, total_vat=total_vat, out_total=out_total,
         active=active, fuel_by_lorry=fuel_by_lorry, alerts=alerts)
 
