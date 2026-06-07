@@ -92,7 +92,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-const fuelData = {{ fuel_by_lorry | tojson }};
+const fuelData = {"L001": 2159.55, "L002": 634.84};
 new Chart(document.getElementById('fuelChart'), {
   type: 'bar',
   data: {
