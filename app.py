@@ -350,22 +350,13 @@ def finance():
     alerts     = build_alerts(props, load_lorries(), load_invoices())
     container_list = load_containers()
     rate = 100
-    container_income = sum(float(c.get("monthly_rate", rate) or rate) for c in container_list if str(c.get("status","")).lower() == "hired")
     container_vacant = len([c for c in container_list if str(c.get("status","")).lower() != "hired"])
-    container_vacant_loss = container_vacant * rate
     lorry_income = sum(float(i.get("amount_gbp",0) or 0) for i in load_invoices())
-    fuel_costs = sum(float(f.get("cost_gbp",0) or 0) for f in load_fuel())
-    combined_monthly = total_rent + container_income + lorry_income
-    combined_net = (total_rent - total_mtg) + container_income + (lorry_income - fuel_costs)
-    daily_income = combined_monthly / 30
     return render_template("finance.html", page="finance",
         props=props, accounts=accounts, cashflow=cashflow,
         occupied=occupied, total_rent=total_rent, total_mtg=total_mtg,
         net_cf=net_cf, total_bal=total_bal, avg_net=avg_net,
         forecast=forecast, alerts=alerts,
-        container_income=container_income, container_vacant_loss=container_vacant_loss,
-        lorry_income=lorry_income, fuel_costs=fuel_costs,
-        combined_monthly=combined_monthly, combined_net=combined_net, daily_income=daily_income)
 
 @app.route("/lorries")
 @login_required
@@ -386,9 +377,6 @@ def lorries():
     alerts = build_alerts(props, lorry_list, invoices)
     return render_template("lorries.html", page="lorries",
         lorries=lorry_list, fuel=fuel, invoices=invoices[:6],
-        container_income=container_income, container_vacant_loss=container_vacant_loss,
-        lorry_income=lorry_income, fuel_costs=fuel_costs,
-        combined_monthly=combined_monthly, combined_net=combined_net, daily_income=daily_income,
         total_fuel=total_fuel, total_vat=total_vat, out_total=out_total,
         active=active, fuel_by_lorry=fuel_by_lorry, alerts=alerts)
 
