@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Portfolio Performance — Vinnie Dashboard{% block scripts %}
+{% block title %}Portfolio Performance — Vinnie Dashboard{% endblock %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 var ranked = {{ ranked_json | safe }};
@@ -24,7 +24,6 @@ new Chart(document.getElementById("topChart"), {
   options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } } }, cutout: "60%" }
 });
 </script>
-{% endblock %}
 {% block content %}
 <div class="page">
   <div class="page-header">
@@ -192,6 +191,7 @@ new Chart(document.getElementById("topChart"), {
   </div>
 
 </div>
+{% endblock %}
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
