@@ -57,6 +57,37 @@ def load_invoices():
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%d %b")
     return df.to_dict("records")
 
+def load_activity():
+    try:
+        df = pd.read_csv(f"{DATA}/activity_log.csv")
+        df = df.where(pd.notnull(df), None)
+        records = df.to_dict("records")
+        return records[:8]
+    except: return []
+
+def log_activity(action, category, section, icon="📋"):
+    try:
+        from datetime import datetime
+        import csv, os
+        path = f"{DATA}/activity_log.csv"
+        rows = []
+        if os.path.exists(path):
+            with open(path) as f:
+                rows = list(csv.DictReader(f))
+        rows.insert(0, {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "action": action,
+            "category": category,
+            "section": section,
+            "icon": icon
+        })
+        rows = rows[:50]  # keep last 50
+        with open(path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=["timestamp","action","category","section","icon"])
+            writer.writeheader()
+            writer.writerows(rows)
+    except: pass
+
 def load_documents():
     try:
         df = pd.read_csv(f"{DATA}/documents.csv")
@@ -196,6 +227,7 @@ def overview():
     outstanding   = [i for i in invoices if i["status"]=="Outstanding"]
     out_total     = sum(float(i["amount_gbp"]) for i in outstanding)
     pending_tasks = [t for t in tasks if not t["done"]]
+    recent_activity = load_activity()
 
     # Net worth
     property_values = {
@@ -273,6 +305,7 @@ def overview():
         problem_count=problem_count,
         problem_loss=problem_loss,
         urgent_alerts=[a for a in alerts if a["level"]=="high"],
+        recent_activity=recent_activity,
     )
 
 @app.route("/properties")
@@ -348,24 +381,11 @@ def finance():
     avg_net    = sum(float(c["net"]) for c in cashflow) / len(cashflow) if cashflow else 0
     forecast   = [(datetime.now()+timedelta(days=30*i)).strftime("%B %Y") for i in range(1,4)]
     alerts     = build_alerts(props, load_lorries(), load_invoices())
-    container_list = load_containers()
-    rate = 100
-    container_income = sum(float(c.get("monthly_rate", rate) or rate) for c in container_list if str(c.get("status","")).lower() == "hired")
-    container_vacant = len([c for c in container_list if str(c.get("status","")).lower() != "hired"])
-    container_vacant_loss = container_vacant * rate
-    lorry_income = sum(float(i.get("amount_gbp",0) or 0) for i in load_invoices())
-    fuel_costs = sum(float(f.get("cost_gbp",0) or 0) for f in load_fuel())
-    combined_monthly = total_rent + container_income + lorry_income
-    combined_net = (total_rent - total_mtg) + container_income + (lorry_income - fuel_costs)
-    daily_income = combined_monthly / 30
     return render_template("finance.html", page="finance",
         props=props, accounts=accounts, cashflow=cashflow,
         occupied=occupied, total_rent=total_rent, total_mtg=total_mtg,
         net_cf=net_cf, total_bal=total_bal, avg_net=avg_net,
-        forecast=forecast, alerts=alerts,
-        container_income=container_income, container_vacant_loss=container_vacant_loss,
-        lorry_income=lorry_income, fuel_costs=fuel_costs,
-        combined_monthly=combined_monthly, combined_net=combined_net, daily_income=daily_income)
+        forecast=forecast, alerts=alerts)
 
 @app.route("/lorries")
 @login_required
@@ -386,6 +406,9 @@ def lorries():
     alerts = build_alerts(props, lorry_list, invoices)
     return render_template("lorries.html", page="lorries",
         lorries=lorry_list, fuel=fuel, invoices=invoices[:6],
+        container_income=container_income, container_vacant_loss=container_vacant_loss,
+        lorry_income=lorry_income, fuel_costs=fuel_costs,
+        combined_monthly=combined_monthly, combined_net=combined_net, daily_income=daily_income,
         total_fuel=total_fuel, total_vat=total_vat, out_total=out_total,
         active=active, fuel_by_lorry=fuel_by_lorry, alerts=alerts)
 
@@ -535,6 +558,10 @@ def containers():
                 "notes":        request.form.get("notes",""),
             })
         save_containers(container_list)
+        log_activity(
+            f"Container {cid} updated — {request.form.get('status','Vacant')}",
+            'Containers', 'containers', '📦'
+        )
         return redirect(url_for("containers"))
 
     hired   = [c for c in container_list if str(c.get("status","")).lower() == "hired"]
@@ -822,6 +849,11 @@ def vat_invoices():
             "notes":       request.form.get("notes",""),
         })
         save_vat_invoices(inv_list)
+        log_activity(
+            f"{request.form.get('supplier','')} invoice added — £{float(request.form.get('total_gbp',0) or 0):.2f}",
+            request.form.get('category','Invoice'),
+            'vat_invoices', '📄'
+        )
         return redirect(url_for("vat_invoices"))
     outstanding_total = sum(float(i["total_gbp"]) for i in inv_list if i.get("status")=="Outstanding" and i.get("total_gbp"))
     outstanding_count = len([i for i in inv_list if i.get("status")=="Outstanding"])

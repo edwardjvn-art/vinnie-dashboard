@@ -288,6 +288,28 @@
     </div>
   </div>
 
+  <!-- Recent activity — bottom right -->
+  <div class="overlay" style="bottom:70px;right:16px;width:260px;z-index:20;">
+    <div style="background:#F8F4EC;border-radius:10px;border:0.5px solid #DDD5C0;box-shadow:0 2px 12px rgba(28,43,74,0.08);overflow:hidden;">
+      <div style="background:#1C2B4A;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(248,244,236,0.7);">Recent Activity</span>
+      </div>
+      {% for a in recent_activity %}
+      <a href="/{{ a.section }}" style="display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-bottom:0.5px solid #EDE8DC;text-decoration:none;">
+        <span style="font-size:13px;flex-shrink:0;margin-top:1px;">{{ a.icon }}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;color:#1C2B4A;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ a.action }}</div>
+          <div style="font-size:10px;color:#8A9BB0;margin-top:1px;">{{ a.timestamp[:10] if a.timestamp else '' }}</div>
+        </div>
+        <span style="font-size:10px;color:#C9A84C;flex-shrink:0;">→</span>
+      </a>
+      {% endfor %}
+      {% if not recent_activity %}
+      <div style="padding:12px;font-size:11px;color:#8A9BB0;text-align:center;">No recent activity</div>
+      {% endif %}
+    </div>
+  </div>
+
   <!-- Legend bottom left -->
   <div class="overlay legend-float">
     <div class="legend-card">
@@ -306,7 +328,7 @@
 
 {% block scripts %}
 <script>
-var mapData = [{property:"5 Queensway Mildenhall",address:"5 Queensway Mildenhall IP28 7JJ",lat:52.3441,lng:0.5089,monthly_rent:2400,mortgage_monthly:1276,mortgage_lender:"TMB",rent_status:"Paid"},{property:"5 Beeches Road West Row",address:"5 Beeches Road West Row IP28 8NP",lat:52.3612,lng:0.5234,monthly_rent:1800,mortgage_monthly:854,mortgage_lender:"NatWest",rent_status:"Paid"},{property:"22 Fleming Avenue Mildenhall",address:"22 Fleming Avenue Mildenhall IP28 7NF",lat:52.3428,lng:0.5071,monthly_rent:600,mortgage_monthly:433,mortgage_lender:"TMW",rent_status:"Paid"},{property:"1 Bernards Close Mildenhall",address:"1 Bernards Close Mildenhall IP28 8UN",lat:52.3398,lng:0.5102,monthly_rent:2400,mortgage_monthly:1089,mortgage_lender:"NatWest",rent_status:"Paid"},{property:"3 Bernards Close Mildenhall",address:"3 Bernards Close Mildenhall IP28 8UN",lat:52.3399,lng:0.5103,monthly_rent:2400,mortgage_monthly:1380,mortgage_lender:"Barclays",rent_status:"Paid"},{property:"4 Bernards Close Mildenhall",address:"4 Bernards Close Mildenhall IP28 8UN",lat:52.3400,lng:0.5104,monthly_rent:2400,mortgage_monthly:1476,mortgage_lender:"NatWest",rent_status:"Paid"},{property:"1A Vinrose Lodge Mildenhall",address:"1A Vinrose Lodge Mildenhall IP28 7JJ",lat:52.3442,lng:0.5090,monthly_rent:1200,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"5a Beeches Road West Row",address:"5a Beeches Road West Row IP28 8NP",lat:52.3613,lng:0.5235,monthly_rent:1200,mortgage_monthly:746,mortgage_lender:"Handelsbanken",rent_status:"Paid"},{property:"5b Beeches Road West Row",address:"5b Beeches Road West Row IP28 8NP",lat:52.3614,lng:0.5236,monthly_rent:1200,mortgage_monthly:746,mortgage_lender:"Handelsbanken",rent_status:"Paid"},{property:"Ponderosa West Row",address:"Ponderosa West Row IP29 9RF",lat:52.3580,lng:0.5190,monthly_rent:1650,mortgage_monthly:510,mortgage_lender:"TSB",rent_status:"Paid"},{property:"Ponderosa Annex West Row",address:"Ponderosa Annex West Row IP29 9RF",lat:52.3581,lng:0.5191,monthly_rent:1600,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"St Michaels Thetford",address:"St Michaels Thetford IP24 3EG",lat:52.4142,lng:0.7432,monthly_rent:400,mortgage_monthly:516,mortgage_lender:"NatWest",rent_status:"Paid"},{property:"Garrod House Flat 1 Lakenheath",address:"Garrod House Flat 1 Lakenheath IP27 9EW",lat:52.4089,lng:0.5321,monthly_rent:1200,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Garrod House Flat 2 Lakenheath",address:"Garrod House Flat 2 Lakenheath IP27 9EW",lat:52.4090,lng:0.5322,monthly_rent:1200,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Garrod House Flat 3 Lakenheath",address:"Garrod House Flat 3 Lakenheath IP27 9EW",lat:52.4091,lng:0.5323,monthly_rent:1200,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Garrod House Flat B Lakenheath",address:"Garrod House Flat B Lakenheath IP27 9EW",lat:52.4092,lng:0.5324,monthly_rent:1100,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Sparks Farm Hurdle Drove",address:"Sparks Farm Hurdle Drove",lat:52.3901,lng:0.4980,monthly_rent:2400,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Cottage Lakenheath",address:"Cottage Lakenheath",lat:52.4085,lng:0.5318,monthly_rent:1200,mortgage_monthly:350,mortgage_lender:"Private Loan",rent_status:"Paid"},{property:"Airview House West Row",address:"Airview House West Row",lat:52.3615,lng:0.5237,monthly_rent:1250,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"Airview Annex West Row",address:"Airview Annex West Row",lat:52.3616,lng:0.5238,monthly_rent:1600,mortgage_monthly:0,mortgage_lender:"",rent_status:"Paid"},{property:"The Shed West Row",address:"The Shed West Row IP28 8NY",lat:52.3618,lng:0.5240,monthly_rent:1600,mortgage_monthly:0,mortgage_lender:"",rent_status:"Overdue"}];
+const mapData = {{ map_data | tojson }};
 
 const map = L.map('map', {
   center: [52.39, 0.56],

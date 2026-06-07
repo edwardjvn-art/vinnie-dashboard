@@ -1,0 +1,6 @@
+timestamp,action,category,section,icon
+2026-06-07 12:00:00,Apple iPhone receipt added — £1199.00,Business Expense,vat_invoices,📄
+2026-06-07 11:00:00,Tate Fleet fuel invoice logged — £3353.27,Fuel,vat_invoices,⛽
+2026-06-07 10:00:00,K&M Tyres maintenance logged — £507.42,Maintenance,maintenance,🔧
+2026-06-07 09:00:00,The Shed squatter case logged,Problem Occupant,problem_occupants,🚨
+2026-06-07 08:00:00,21 properties loaded onto dashboard,Properties,properties,🏠
