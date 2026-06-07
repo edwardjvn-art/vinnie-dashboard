@@ -31,15 +31,29 @@
     <div>
       <div class="card-title" style="margin-bottom:0.75rem;">Fleet</div>
       {% for l in lorries %}
-      <a href="{{ url_for('lorry_detail', lorry_id=l.lorry_id) }}" class="item-card">
-        <div>
-          <div class="item-card-title">{{ l.reg }} — {{ l.make }} {{ l.model }}</div>
-          <div class="item-card-sub">{{ l.driver }} · {{ l.year }}</div>
-        </div>
-        <div class="item-card-right">
-          {% if l.status == 'Active' %}<span class="pill pill-green">Active</span>
-          {% else %}<span class="pill pill-orange">{{ l.status }}</span>{% endif %}
-          <span class="open-arrow">Open →</span>
+      <a href="{{ url_for('lorry_detail', lorry_id=l.lorry_id) }}" style="display:block;text-decoration:none;margin-bottom:8px;">
+        <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-left:3px solid {{ '#1A7A4A' if l.status == 'Active' else '#C17F24' }};border-radius:var(--border-radius-md);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.15s;">
+          <div>
+            <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">
+              {% if l.reg and l.reg != 'TBC' %}{{ l.reg }}{% else %}Lorry {{ l.lorry_id }}{% endif %}
+              {% if l.make and l.make != 'TBC' %} — {{ l.make }} {{ l.model }}{% endif %}
+            </div>
+            <div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px;">
+              {% if l.driver and l.driver != 'TBC' %}{{ l.driver }}{% else %}Driver TBC{% endif %}
+              {% if l.year and l.year != 'TBC' %} · {{ l.year }}{% endif %}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            {% if l.mot_expiry and l.mot_expiry != 'TBC' %}
+            <div style="text-align:right;">
+              <div style="font-size:9px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;">MOT</div>
+              <div style="font-size:11px;color:var(--color-text-primary);">{{ l.mot_expiry }}</div>
+            </div>
+            {% endif %}
+            {% if l.status == 'Active' %}<span style="font-size:11px;background:#EAF5EE;color:#1A7A4A;padding:3px 10px;border-radius:20px;">Active</span>
+            {% else %}<span style="font-size:11px;background:#FDF3E4;color:#C17F24;padding:3px 10px;border-radius:20px;">{{ l.status }}</span>{% endif %}
+            <span style="font-size:12px;color:var(--color-text-secondary);">→</span>
+          </div>
         </div>
       </a>
       {% endfor %}
@@ -77,14 +91,13 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-const fuelData = {"L001": 2159.55, "L002": 634.84};
+const fuelData = {{ fuel_by_lorry | tojson }};
 new Chart(document.getElementById('fuelChart'), {
   type: 'bar',
   data: {
     labels: Object.keys(fuelData),
-    datasets: [{ data: Object.values(fuelData), backgroundColor: '#C9A84C', borderRadius: 4, label: 'Fuel cost' }]
+    datasets: [{ data: Object.values(fuelData), backgroundColor: 'rgba(26,180,215,0.8)', borderRadius: 4, label: 'Fuel cost' }]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
