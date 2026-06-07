@@ -57,6 +57,16 @@ def load_invoices():
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%d %b")
     return df.to_dict("records")
 
+def load_documents():
+    try:
+        df = pd.read_csv(f"{DATA}/documents.csv")
+        df = df.where(pd.notnull(df), None)
+        return df.to_dict("records")
+    except: return []
+
+def save_documents(records):
+    pd.DataFrame(records).to_csv(f"{DATA}/documents.csv", index=False)
+
 def load_problem_occupants():
     try:
         df = pd.read_csv(f"{DATA}/problem_occupants.csv")
@@ -338,24 +348,11 @@ def finance():
     avg_net    = sum(float(c["net"]) for c in cashflow) / len(cashflow) if cashflow else 0
     forecast   = [(datetime.now()+timedelta(days=30*i)).strftime("%B %Y") for i in range(1,4)]
     alerts     = build_alerts(props, load_lorries(), load_invoices())
-    container_list = load_containers()
-    rate = 100
-    container_income = sum(float(c.get("monthly_rate", rate) or rate) for c in container_list if str(c.get("status","")).lower() == "hired")
-    container_vacant = len([c for c in container_list if str(c.get("status","")).lower() != "hired"])
-    container_vacant_loss = container_vacant * rate
-    lorry_income = sum(float(i.get("amount_gbp",0) or 0) for i in load_invoices())
-    fuel_costs = sum(float(f.get("cost_gbp",0) or 0) for f in load_fuel())
-    combined_monthly = total_rent + container_income + lorry_income
-    combined_net = (total_rent - total_mtg) + container_income + (lorry_income - fuel_costs)
-    daily_income = combined_monthly / 30
     return render_template("finance.html", page="finance",
         props=props, accounts=accounts, cashflow=cashflow,
         occupied=occupied, total_rent=total_rent, total_mtg=total_mtg,
         net_cf=net_cf, total_bal=total_bal, avg_net=avg_net,
-        forecast=forecast, alerts=alerts,
-        container_income=container_income, container_vacant_loss=container_vacant_loss,
-        lorry_income=lorry_income, fuel_costs=fuel_costs,
-        combined_monthly=combined_monthly, combined_net=combined_net, daily_income=daily_income)
+        forecast=forecast, alerts=alerts)
 
 @app.route("/lorries")
 @login_required
@@ -376,6 +373,9 @@ def lorries():
     alerts = build_alerts(props, lorry_list, invoices)
     return render_template("lorries.html", page="lorries",
         lorries=lorry_list, fuel=fuel, invoices=invoices[:6],
+        container_income=container_income, container_vacant_loss=container_vacant_loss,
+        lorry_income=lorry_income, fuel_costs=fuel_costs,
+        combined_monthly=combined_monthly, combined_net=combined_net, daily_income=daily_income,
         total_fuel=total_fuel, total_vat=total_vat, out_total=out_total,
         active=active, fuel_by_lorry=fuel_by_lorry, alerts=alerts)
 
@@ -643,6 +643,80 @@ def property_map():
     return render_template("map.html", page="map",
         props=props, map_data=map_data,
         total_rent=total_rent, alerts=alerts)
+
+@app.route("/compliance", methods=["GET","POST"])
+@login_required
+def compliance():
+    from datetime import date, datetime
+    props = load_props()
+    alerts = build_alerts(props, load_lorries(), load_invoices())
+    docs = load_documents()
+    today = date.today()
+
+    if request.method == "POST":
+        prop = request.form.get("property","")
+        dtype = request.form.get("document_type","")
+        for d in docs:
+            if d.get("property") == prop and d.get("document_type") == dtype:
+                d["expiry_date"] = request.form.get("expiry_date","")
+                d["drive_link"]  = request.form.get("drive_link","")
+                d["notes"]       = request.form.get("notes","")
+                break
+        else:
+            docs.append({
+                "property":      prop,
+                "document_type": dtype,
+                "expiry_date":   request.form.get("expiry_date",""),
+                "drive_link":    request.form.get("drive_link",""),
+                "notes":         request.form.get("notes",""),
+            })
+        save_documents(docs)
+        return redirect(url_for("compliance"))
+
+    # Categorise docs
+    expired_docs  = []
+    expiring_docs = []
+    pending_docs  = []
+    for d in docs:
+        exp = d.get("expiry_date")
+        if not exp or str(exp) in ["","None","nan"]:
+            pending_docs.append(d)
+        else:
+            try:
+                exp_date = datetime.strptime(str(exp)[:10], "%Y-%m-%d").date()
+                days_left = (exp_date - today).days
+                d["days_left"] = days_left
+                if days_left < 0:
+                    expired_docs.append(d)
+                elif days_left <= 90:
+                    expiring_docs.append(d)
+            except:
+                pending_docs.append(d)
+
+    # Tenancy renewals — next 6 months
+    renewals = []
+    for p in props:
+        end = p.get("tenancy_end","")
+        if end and str(end) not in ["","SPT","nan","None","—"]:
+            try:
+                end_date = datetime.strptime(str(end)[:10], "%Y-%m-%d").date()
+                days_left = (end_date - today).days
+                if 0 <= days_left <= 180:
+                    renewals.append({
+                        "property": p["property"],
+                        "end_date": str(end)[:10],
+                        "days_left": days_left,
+                        "rent": float(p.get("monthly_rent",0) or 0),
+                        "lender": p.get("mortgage_lender",""),
+                    })
+            except: pass
+    renewals.sort(key=lambda x: x["days_left"])
+
+    return render_template("compliance.html", page="compliance",
+        expired_docs=expired_docs, expiring_docs=expiring_docs, pending_docs=pending_docs,
+        expired_count=len(expired_docs), expiring_count=len(expiring_docs),
+        pending_count=len(pending_docs), renewals=renewals, renewals_count=len(renewals),
+        all_props=props, alerts=alerts)
 
 @app.route("/problem-occupants", methods=["GET","POST"])
 @login_required

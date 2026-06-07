@@ -210,6 +210,11 @@
         </div>
       </li>
 
+      <!-- Alerts -->
+      <li class="nav-item">
+        <a href="{{ url_for('alerts_page') }}" class="{{ 'active' if page == 'alerts_page' else '' }}">Alerts</a>
+      </li>
+
       <!-- Map -->
       <li class="nav-item">
         <a href="{{ url_for('property_map') }}" class="{{ 'active' if page == 'property_map' else '' }}">Map</a>

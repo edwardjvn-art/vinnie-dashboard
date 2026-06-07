@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Compliance & Renewals — VS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Compliance & Renewals</div>
+    <div class="page-sub">Document expiries, tenancy renewals and legal deadlines</div>
+  </div>
+
+  <div class="metrics metrics-4" style="margin-bottom:1.25rem;">
+    <div class="metric red">
+      <div class="metric-label">Expired / Overdue</div>
+      <div class="metric-value">{{ expired_count }}</div>
+      <div class="metric-sub">Immediate action needed</div>
+    </div>
+    <div class="metric orange">
+      <div class="metric-label">Expiring Soon</div>
+      <div class="metric-value">{{ expiring_count }}</div>
+      <div class="metric-sub">Within 90 days</div>
+    </div>
+    <div class="metric orange">
+      <div class="metric-label">Tenancies Ending</div>
+      <div class="metric-value">{{ renewals_count }}</div>
+      <div class="metric-sub">Within 6 months</div>
+    </div>
+    <div class="metric accent">
+      <div class="metric-label">Docs Pending</div>
+      <div class="metric-value">{{ pending_count }}</div>
+      <div class="metric-sub">No date recorded</div>
+    </div>
+  </div>
+
+  <!-- Tenancy renewals -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="card-header">
+      <span class="card-title">Tenancy Renewal Pipeline</span>
+      <span class="pill pill-orange">Next 6 months</span>
+    </div>
+    <div style="padding:0.75rem;">
+      {% if renewals %}
+        {% for r in renewals %}
+        <div style="background:{{ '#FDF9F0' if r.days_left < 60 else 'var(--color-background-primary)' }};border:0.5px solid {{ '#F5DDB0' if r.days_left < 60 else 'var(--color-border-tertiary)' }};border-left:3px solid {{ '#C0392B' if r.days_left < 30 else ('#C9A84C' if r.days_left < 60 else '#1C2B4A') }};border-radius:var(--border-radius-md);padding:12px 16px;margin-bottom:6px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;gap:12px;">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">{{ r.property }}</div>
+            <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">£{{ "{:,.0f}".format(r.rent) }}/mo · {{ r.lender if r.lender and r.lender not in ['None','nan',''] else 'Owned' }}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">End Date</div>
+            <div style="font-size:13px;font-weight:500;">{{ r.end_date }}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Days Left</div>
+            <div style="font-size:13px;font-weight:600;color:{{ '#C0392B' if r.days_left < 30 else ('#C17F24' if r.days_left < 60 else 'var(--color-text-primary)') }};">{{ r.days_left }} days</div>
+          </div>
+          <div>
+            {% if r.days_left < 30 %}<span style="font-size:11px;background:#FBEAEA;color:#C0392B;padding:3px 10px;border-radius:20px;">Urgent — serve notice</span>
+            {% elif r.days_left < 60 %}<span style="font-size:11px;background:#FDF3E4;color:#C17F24;padding:3px 10px;border-radius:20px;">Contact tenant now</span>
+            {% else %}<span style="font-size:11px;background:#E8EEF8;color:#1C2B4A;padding:3px 10px;border-radius:20px;">Plan renewal</span>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:13px;">No tenancies ending in the next 6 months</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Document expiry -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Document Expiry Register</span>
+      <a href="{{ url_for('compliance') }}" class="btn-outline" style="font-size:11px;padding:5px 12px;">Add / Update</a>
+    </div>
+
+    {% if expired_docs %}
+    <div style="padding:0.5rem 0.75rem 0;">
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#C0392B;margin-bottom:6px;padding-left:4px;">Expired or overdue</div>
+      {% for d in expired_docs %}
+      <div style="background:#FEF9F9;border:0.5px solid #F5C6C6;border-left:3px solid #C0392B;border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:5px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;gap:12px;">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">{{ d.property }}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">{{ d.document_type }}</div>
+        <div style="font-size:12px;font-weight:600;color:#C0392B;">{{ d.expiry_date or 'No date' }}</div>
+        <div>{% if d.drive_link %}<a href="{{ d.drive_link }}" target="_blank" style="color:#1C2B4A;font-size:11px;">View →</a>{% else %}<span style="font-size:11px;color:#C0392B;">Upload needed</span>{% endif %}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if expiring_docs %}
+    <div style="padding:0.5rem 0.75rem 0;">
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#C17F24;margin-bottom:6px;padding-left:4px;">Expiring within 90 days</div>
+      {% for d in expiring_docs %}
+      <div style="background:#FDF9F0;border:0.5px solid #F5DDB0;border-left:3px solid #C9A84C;border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:5px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;gap:12px;">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">{{ d.property }}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">{{ d.document_type }}</div>
+        <div style="font-size:12px;font-weight:500;color:#C17F24;">{{ d.expiry_date }} ({{ d.days_left }}d)</div>
+        <div>{% if d.drive_link %}<a href="{{ d.drive_link }}" target="_blank" style="color:#1C2B4A;font-size:11px;">View →</a>{% else %}<span style="font-size:11px;color:var(--color-text-secondary);">No doc</span>{% endif %}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if pending_docs %}
+    <div style="padding:0.5rem 0.75rem 0.75rem;">
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:6px;padding-left:4px;">No date recorded — update needed</div>
+      {% for d in pending_docs[:10] %}
+      <div style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-left:3px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:5px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;gap:12px;">
+        <div style="font-size:13px;color:var(--color-text-primary);">{{ d.property }}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">{{ d.document_type }}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">Date unknown</div>
+        <div><span style="font-size:11px;color:var(--color-text-secondary);">Add date →</span></div>
+      </div>
+      {% endfor %}
+      {% if pending_docs|length > 10 %}
+      <div style="text-align:center;font-size:12px;color:var(--color-text-secondary);padding:8px;">+ {{ pending_docs|length - 10 }} more pending</div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Add/update form -->
+    <div style="border-top:0.5px solid var(--color-border-tertiary);padding:1rem 1.25rem;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px;">Add / Update Document</div>
+      <form method="POST" action="{{ url_for('compliance') }}">
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label>Property</label>
+            <select name="property">
+              {% for p in all_props %}
+              <option value="{{ p.property }}">{{ p.property }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Document Type</label>
+            <select name="document_type">
+              <option>Gas Safety Certificate</option>
+              <option>EPC</option>
+              <option>Electrical Certificate</option>
+              <option>Buildings Insurance</option>
+              <option>Tenancy Agreement</option>
+              <option>HMO Licence</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="date" name="expiry_date">
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label>Google Drive Link</label>
+            <input type="text" name="drive_link" placeholder="Paste link to document">
+          </div>
+        </div>
+        <button type="submit" class="btn">Save Document</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
