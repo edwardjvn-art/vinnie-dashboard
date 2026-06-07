@@ -77,9 +77,9 @@
               {% if d.scheme and d.scheme != 'nan' and d.scheme %}
                 <span class="pill pill-green">Protected</span>
               {% elif d.deposit_amount and d.deposit_amount != 'nan' %}
-                <span class="pill pill-red">Not protected</span>
+                <span class="pill pill-orange">Not yet registered</span>
               {% else %}
-                <span class="pill pill-grey">Not set</span>
+                <span class="pill pill-grey">Pending</span>
               {% endif %}
             </td>
             <td>

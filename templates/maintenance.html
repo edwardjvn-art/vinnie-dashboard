@@ -25,22 +25,27 @@
   {% if ip %}
   <div class="card" style="margin-top:1.5rem;margin-bottom:1.25rem;">
     <div class="card-header"><span class="card-title" style="color:#D97706;">Open Issues</span></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Property</th><th>Issue</th><th>Date</th><th>Cost</th><th>Notes</th><th>By</th></tr></thead>
-        <tbody>
-          {% for m in ip %}
-          <tr>
-            <td><strong>{{ m.property.split(',')[0] }}</strong></td>
-            <td>{{ m.issue }}</td>
-            <td class="td-muted">{{ m.date }}</td>
-            <td>{% if m.cost and m.cost|float > 0 %}£{{ "{:,.2f}".format(m.cost|float) }}{% else %}TBC{% endif %}</td>
-            <td class="td-muted">{{ m.notes }}</td>
-            <td class="td-muted">{{ m.logged_by }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div style="padding:0.75rem;">
+      {% for m in ip %}
+      <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-left:3px solid #C0392B;border-radius:var(--border-radius-md);padding:12px 16px;margin-bottom:6px;display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1fr;align-items:center;gap:12px;">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">{{ m.property }}</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">{{ m.issue }}</div>
+        </div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">{{ m.notes or '—' }}</div>
+        <div>
+          <div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Date</div>
+          <div style="font-size:12px;">{{ m.date or '—' }}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Cost</div>
+          <div style="font-size:12px;font-weight:500;">{% if m.cost and m.cost|string not in ['nan','None',''] and m.cost|float > 0 %}£{{ "{:,.2f}".format(m.cost|float) }}{% else %}TBC{% endif %}</div>
+        </div>
+        <div>
+          <span style="font-size:11px;background:#FBEAEA;color:#C0392B;padding:3px 10px;border-radius:20px;">In Progress</span>
+        </div>
+      </div>
+      {% endfor %}
     </div>
   </div>
   {% endif %}

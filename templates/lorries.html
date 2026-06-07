@@ -35,7 +35,7 @@
         <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-left:3px solid {{ '#1A7A4A' if l.status == 'Active' else '#C17F24' }};border-radius:var(--border-radius-md);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.15s;">
           <div>
             <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">
-              {% if l.reg and l.reg != 'TBC' %}{{ l.reg }}{% else %}Lorry {{ l.lorry_id }}{% endif %}
+              {% if l.reg and l.reg != 'TBC' %}{{ l.reg }}{% else %}<span style="color:var(--color-text-secondary);font-style:italic;">Registration pending</span>{% endif %}
               {% if l.make and l.make != 'TBC' %} — {{ l.make }} {{ l.model }}{% endif %}
             </div>
             <div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px;">
