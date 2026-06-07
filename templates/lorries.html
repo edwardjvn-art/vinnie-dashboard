@@ -79,7 +79,7 @@
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-const fuelData = {{ fuel_by_lorry | tojson }};
+const fuelData = {"L001": 2159.55, "L002": 634.84};
 new Chart(document.getElementById('fuelChart'), {
   type: 'bar',
   data: {
