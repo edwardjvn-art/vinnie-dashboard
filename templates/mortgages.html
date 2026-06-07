@@ -1,5 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Mortgages — Vinnie Dashboard{% endblock %}
+{% block title %}Mortgages — Vinnie Dashboard{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+var lenderData = {
+  "TMB": 223000, "NatWest": 954000, "Barclays": 342000,
+  "Handelsbanken": 160000, "TSB": 245000, "Private Loan": 95000
+};
+var paymentData = {
+  "TMB": 1276, "NatWest": 3080, "Barclays": 1380,
+  "Handelsbanken": 1492, "TSB": 510, "Private Loan": 350
+};
+var palette = ["#1C2B4A","#243458","#2D3F6B","#C9A84C","#E8C96A","#8A9BB0"];
+
+new Chart(document.getElementById("lenderChart"), {
+  type: "doughnut",
+  data: {
+    labels: Object.keys(lenderData),
+    datasets: [{ data: Object.values(lenderData), backgroundColor: palette, borderWidth: 0 }]
+  },
+  options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } } }, cutout: "65%" }
+});
+
+new Chart(document.getElementById("paymentChart"), {
+  type: "bar",
+  data: {
+    labels: Object.keys(paymentData),
+    datasets: [{ data: Object.values(paymentData), backgroundColor: "#1C2B4A", borderRadius: 4, label: "£/mo" }]
+  },
+  options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => "£"+v } } } }
+});
+</script>
+{% endblock %}
 {% block content %}
 <div class="page">
   <div class="page-header"><div class="page-title">Mortgages</div></div>
@@ -33,6 +64,21 @@
   </div>
   {% endif %}
 
+  <div class="grid-2" style="margin-bottom:1.25rem;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Mortgage Balance by Lender</span></div>
+      <div class="card-body" style="display:flex;align-items:center;justify-content:center;height:220px;">
+        <canvas id="lenderChart" style="max-height:200px;"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Monthly Payments by Lender</span></div>
+      <div class="card-body" style="display:flex;align-items:center;justify-content:center;height:220px;">
+        <canvas id="paymentChart" style="max-height:200px;"></canvas>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="table-wrap">
       <table>
@@ -62,4 +108,35 @@
     </div>
   </div>
 </div>
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+var lenderData = {
+  "TMB": 223000, "NatWest": 954000, "Barclays": 342000,
+  "Handelsbanken": 160000, "TSB": 245000, "Private Loan": 95000
+};
+var paymentData = {
+  "TMB": 1276, "NatWest": 3080, "Barclays": 1380,
+  "Handelsbanken": 1492, "TSB": 510, "Private Loan": 350
+};
+var palette = ["#1C2B4A","#243458","#2D3F6B","#C9A84C","#E8C96A","#8A9BB0"];
+
+new Chart(document.getElementById("lenderChart"), {
+  type: "doughnut",
+  data: {
+    labels: Object.keys(lenderData),
+    datasets: [{ data: Object.values(lenderData), backgroundColor: palette, borderWidth: 0 }]
+  },
+  options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } } }, cutout: "65%" }
+});
+
+new Chart(document.getElementById("paymentChart"), {
+  type: "bar",
+  data: {
+    labels: Object.keys(paymentData),
+    datasets: [{ data: Object.values(paymentData), backgroundColor: "#1C2B4A", borderRadius: 4, label: "£/mo" }]
+  },
+  options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => "£"+v } } } }
+});
+</script>
 {% endblock %}

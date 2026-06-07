@@ -1,5 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Portfolio Performance — Vinnie Dashboard{% endblock %}
+{% block title %}Portfolio Performance — Vinnie Dashboard{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+var ranked = {{ ranked_json | safe }};
+var labels = ranked.map(r => r.property.split(" ").slice(0,2).join(" "));
+var nets = ranked.map(r => r.net_monthly);
+var colors = nets.map(n => n >= 0 ? "#1C2B4A" : "#C0392B");
+
+new Chart(document.getElementById("profitChart"), {
+  type: "bar",
+  data: { labels: labels, datasets: [{ data: nets, backgroundColor: colors, borderRadius: 4, label: "Net £/mo" }] },
+  options: { indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { ticks: { callback: v => "£"+v } } } }
+});
+
+var top5 = ranked.slice(0,5);
+var bot5 = ranked.slice(-5).reverse();
+new Chart(document.getElementById("topChart"), {
+  type: "doughnut",
+  data: {
+    labels: top5.map(r => r.property.split(" ").slice(0,2).join(" ")),
+    datasets: [{ data: top5.map(r => Math.max(0, r.net_monthly)), backgroundColor: ["#1C2B4A","#243458","#2D3F6B","#364A7E","#C9A84C"], borderWidth: 0 }]
+  },
+  options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } } }, cutout: "60%" }
+});
+</script>
+{% endblock %}
 {% block content %}
 <div class="page">
   <div class="page-header">
@@ -27,6 +52,20 @@
       <div class="metric-label">Total Net Profit</div>
       <div class="metric-value">£{{ "{:,.0f}".format(total_net) }}/mo</div>
       <div class="metric-sub">After all mortgages</div>
+    </div>
+  </div>
+
+  <!-- Yield chart -->
+  <div class="grid-2" style="margin-bottom:1.25rem;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Net Profit per Property</span></div>
+      <div class="card-body"><canvas id="profitChart" style="max-height:220px;"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Best vs Worst — Monthly Net</span></div>
+      <div class="card-body" style="display:flex;align-items:center;justify-content:center;">
+        <canvas id="topChart" style="max-height:220px;"></canvas>
+      </div>
     </div>
   </div>
 
@@ -153,4 +192,29 @@
   </div>
 
 </div>
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+var ranked = {{ ranked_json | safe }};
+var labels = ranked.map(r => r.property.split(" ").slice(0,2).join(" "));
+var nets = ranked.map(r => r.net_monthly);
+var colors = nets.map(n => n >= 0 ? "#1C2B4A" : "#C0392B");
+
+new Chart(document.getElementById("profitChart"), {
+  type: "bar",
+  data: { labels: labels, datasets: [{ data: nets, backgroundColor: colors, borderRadius: 4, label: "Net £/mo" }] },
+  options: { indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { ticks: { callback: v => "£"+v } } } }
+});
+
+var top5 = ranked.slice(0,5);
+var bot5 = ranked.slice(-5).reverse();
+new Chart(document.getElementById("topChart"), {
+  type: "doughnut",
+  data: {
+    labels: top5.map(r => r.property.split(" ").slice(0,2).join(" ")),
+    datasets: [{ data: top5.map(r => Math.max(0, r.net_monthly)), backgroundColor: ["#1C2B4A","#243458","#2D3F6B","#364A7E","#C9A84C"], borderWidth: 0 }]
+  },
+  options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } } }, cutout: "60%" }
+});
+</script>
 {% endblock %}
