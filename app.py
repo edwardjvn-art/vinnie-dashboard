@@ -225,7 +225,7 @@ def build_alerts(props, lorries, invoices):
 def login():
     error = None
     if request.method == "POST":
-        if request.form.get("username","").lower() == "vinnie" and check_password(request.form.get("password","")):
+        if request.form.get("username","").lower() == "admin" and check_password(request.form.get("password","")):
             session["authenticated"] = True
             return redirect(url_for("overview"))
         error = "Incorrect username or password."
