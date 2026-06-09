@@ -450,6 +450,8 @@ def lorries():
     for f in fuel:
         reg = f["reg"]
         fuel_by_lorry[reg] = fuel_by_lorry.get(reg, 0) + float(f["cost_gbp"])
+    lorry_income = sum(float(i.get("amount_gbp",0) or 0) for i in invoices)
+    fuel_costs = total_fuel
     alerts = build_alerts(props, lorry_list, invoices)
     return render_template("lorries.html", page="lorries",
         lorries=lorry_list, fuel=fuel, invoices=invoices[:6],
