@@ -212,7 +212,6 @@
 
       <!-- Alerts -->
       <li class="nav-item">
-        <a href="{{ url_for('alerts_page') }}" class="{{ 'active' if page == 'alerts_page' else '' }}">Alerts</a>
       </li>
 
       <!-- Map -->
@@ -235,7 +234,6 @@
     <div class="nav-mobile-section">
       <div class="nav-mobile-label">Main</div>
       <a href="{{ url_for('overview') }}" class="{{ 'active' if page == 'overview' else '' }}" onclick="closeMobile()">Overview</a>
-      <a href="{{ url_for('alerts_page') }}" class="{{ 'active' if page == 'alerts_page' else '' }}" onclick="closeMobile()">Alerts</a>
       <a href="{{ url_for('property_map') }}" class="{{ 'active' if page == 'property_map' else '' }}" onclick="closeMobile()">Map</a>
     </div>
     <div class="nav-mobile-section">
