@@ -229,7 +229,6 @@ def login():
             session["authenticated"] = True
             return redirect(url_for("overview"))
         error = "Incorrect username or password."
-        send_alert("Failed login - Vinnie Dashboard", "Failed login from IP: " + str(request.remote_addr))
         send_alert(
             "Failed login attempt - Vinnie Dashboard",
             "Failed login from IP: " + str(request.remote_addr)
