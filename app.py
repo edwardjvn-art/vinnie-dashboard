@@ -5,6 +5,21 @@ import bcrypt
 import os
 from datetime import date, datetime, timedelta
 from functools import wraps
+import smtplib
+from email.mime.text import MIMEText
+
+def send_alert(subject, body):
+    try:
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"] = "elottoel27@gmail.com"
+        msg["To"] = "edwardjvn@icloud.com"
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+            s.login("elottoel27@gmail.com", "ynaa vxvd wzzk kowu")
+            s.send_message(msg)
+    except Exception as e:
+        print(f"Email error: {e}")
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "vinnie-dashboard-secret-2025")
@@ -199,6 +214,7 @@ def login():
             session["authenticated"] = True
             return redirect(url_for("overview"))
         error = "Incorrect username or password."
+        send_alert("Failed login - Vinnie Dashboard", "Failed login from IP: " + str(request.remote_addr))
         send_alert(
             "Failed login attempt - Vinnie Dashboard",
             "Failed login from IP: " + str(request.remote_addr)
