@@ -873,6 +873,32 @@ def vat_invoices():
         invoices=inv_list, outstanding_total=outstanding_total,
         outstanding_count=outstanding_count, vat_total=vat_total, alerts=alerts)
 
+@app.route("/admin/activity")
+@login_required
+def admin_activity():
+    import re
+    log_path = "/var/log/nginx/vinnie_access.log"
+    entries = []
+    try:
+        with open(log_path) as f:
+            lines = f.readlines()[-200:]
+        for line in reversed(lines):
+            m = re.match(r'(\S+) - - \[([^\]]+)\] "(\S+) (\S+) [^"]+" (\d+) \d+', line)
+            if m:
+                ip, time_str, method, path, status = m.groups()
+                if any(x in path for x in ['.css','.js','.ico','.png','.jpg','.woff']):
+                    continue
+                entries.append({
+                    "ip": ip,
+                    "time": time_str.split(" +")[0],
+                    "method": method,
+                    "path": path,
+                    "status": status
+                })
+    except:
+        entries = []
+    return render_template("admin_activity.html", page="admin", entries=entries)
+
 @app.context_processor
 def inject_now():
     return {"now": datetime.now().strftime("%H:%M")}
