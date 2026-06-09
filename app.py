@@ -9,6 +9,21 @@ import smtplib
 from email.mime.text import MIMEText
 
 def send_alert(subject, body):
+    import threading
+    def _send():
+        try:
+            msg = MIMEText(body)
+            msg["Subject"] = subject
+            msg["From"] = "elottoel27@gmail.com"
+            msg["To"] = "edwardjvn@icloud.com"
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+                s.login("elottoel27@gmail.com", "ynaa vxvd wzzk kowu")
+                s.send_message(msg)
+        except Exception as e:
+            print(f"Email error: {e}")
+    threading.Thread(target=_send, daemon=True).start()
+    return
+def send_alert_old(subject, body):
     try:
         msg = MIMEText(body)
         msg["Subject"] = subject
