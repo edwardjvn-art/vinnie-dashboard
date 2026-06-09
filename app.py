@@ -199,6 +199,10 @@ def login():
             session["authenticated"] = True
             return redirect(url_for("overview"))
         error = "Incorrect username or password."
+        send_alert(
+            "Failed login attempt - Vinnie Dashboard",
+            "Failed login from IP: " + str(request.remote_addr)
+        )
     return render_template("login.html", error=error)
 
 @app.route("/logout")
