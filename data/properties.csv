@@ -1,6 +1,5 @@
 property,address,bedrooms,monthly_rent,rent_status,tenancy_end,mortgage_lender,mortgage_balance,mortgage_rate,mortgage_monthly,mortgage_type,mortgage_end,mortgage_doc_link,tenancy_doc_link,insurance_doc_link
 5 Queensway Mildenhall,5 Queensway Mildenhall IP28 7JJ,3,2400,Paid,SPT,TMB,223000,,1276.03,Unknown,,,,
-5 Beeches Road West Row,5 Beeches Road West Row IP28 8NP,3,1800,Paid,SPT,NatWest,225000,,853.92,Unknown,,,,
 22 Fleming Avenue Mildenhall,22 Fleming Avenue Mildenhall IP28 7NF,2,600,Paid,SPT,TMW,111000,,432.67,Unknown,,,,
 1 Bernards Close Mildenhall,1 Bernards Close Mildenhall IP28 8UN,3,2400,Paid,07/2027,NatWest,251000,,1089.09,Unknown,2027-07-01,,,
 3 Bernards Close Mildenhall,3 Bernards Close Mildenhall IP28 8UN,3,2400,Paid,06/2027,Barclays,342000,,1380.27,Unknown,2027-06-01,,,
