@@ -4,3 +4,7 @@ timestamp,action,category,section,icon
 2026-06-07 10:00:00,K&M Tyres maintenance logged — £507.42,Maintenance,maintenance,🔧
 2026-06-07 09:00:00,The Shed squatter case logged,Problem Occupant,problem_occupants,🚨
 2026-06-07 08:00:00,21 properties loaded onto dashboard,Properties,properties,🏠
+2026-06-10,Tenant data updated — real names and deposit certificates added,Data,tenants,📋
+2026-06-10,Deposit records updated — 5 mydeposits certificates imported,Finance,deposits,💰
+2026-06-10,Driver names updated — Mark Adams, Nigel Weer, Gary Amoss,Operations,lorries,🚛
+2026-06-10,St Michaels rent corrected to £550/month,Finance,properties,🏠
