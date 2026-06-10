@@ -1,7 +1,13 @@
 property,tenant_name,email,phone,move_in_date,tenancy_end,deposit,emergency_contact
-14 Maple Street Bristol,John Smith,john.smith@email.com,07700 900123,2023-01-01,2025-12-01,2800,Jane Smith 07700 900124
-7 Oak Lane Manchester,Sarah Jones,sarah.jones@email.com,07700 900234,2023-03-01,2026-03-01,3300,Mike Jones 07700 900235
-22 High Road Leeds,Ahmed Khan,ahmed.khan@email.com,07700 900345,2022-08-01,2025-08-01,1900,Fatima Khan 07700 900346
-3 Church View Exeter,Vacant,,,,,,
-55 Park Avenue Bath,Emma Williams,emma.williams@email.com,07700 900456,2022-01-01,2026-01-01,4400,Tom Williams 07700 900457
-9 River Close Norwich,David Brown,david.brown@email.com,07700 900567,2023-09-01,2025-09-01,2200,Lisa Brown 07700 900568
+1A Vinrose,Mr Dillon Rasmussen,,,,,,
+5a Beeches,Mr Xavier Alexander Silver,,,,,,
+5b Beeches,Mr Tony Evans,,,,,,
+Airview Flat,Mr Connor Gratten,,,,,,
+Flat 3 Lakenheath,Mr Alec Yarbrough,,,,,,
+Flat 2 Lakenheath,Mr Christopher Trevino,,,,,,
+Sparks Farm,Mr Jake Kitchener,,,,,,
+The Shed West Row,Trystin Berg,,,,,,
+1 Bernards Close,TBC,,,,,,
+3 Bernards Close,TBC,,,,,,
+4 Bernards Close,TBC,,,,,,
+The Cottage,TBC,,,,,,
